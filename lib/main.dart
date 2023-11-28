@@ -19,6 +19,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+
 void configLoading() {
   EasyLoading.instance
     ..displayDuration = const Duration(milliseconds: 2000)
