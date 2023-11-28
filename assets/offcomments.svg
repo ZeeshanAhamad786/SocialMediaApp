@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="21.198" height="20.687" viewBox="0 0 21.198 20.687">
+  <g id="Group_12728" data-name="Group 12728" transform="translate(-28.151 -686.142)">
+    <g id="Iconly_Bulk_Chat" data-name="Iconly/Bulk/Chat" transform="translate(29 687)">
+      <g id="Chat">
+        <path id="Fill_1" data-name="Fill 1" d="M9.77,0A9.749,9.749,0,0,0,0,9.75a10.3,10.3,0,0,0,1.316,4.865,1.019,1.019,0,0,1,.068.878L.731,17.677a.609.609,0,0,0,.8.76L3.5,17.852a1.662,1.662,0,0,1,1.454.351A9.737,9.737,0,1,0,9.77,0" fill="#3ea7ff" opacity="0.4"/>
+        <path id="Combined_Shape" data-name="Combined Shape" d="M8.99,1.248A1.248,1.248,0,1,1,10.238,2.5,1.244,1.244,0,0,1,8.99,1.248ZM4.5,1.238A1.248,1.248,0,1,1,5.743,2.5,1.259,1.259,0,0,1,4.5,1.238ZM0,1.248a1.248,1.248,0,1,1,2.5,0A1.257,1.257,0,0,1,1.248,2.5,1.257,1.257,0,0,1,0,1.248Z" transform="translate(3.988 8.512)" fill="#3ea7ff"/>
+      </g>
+    </g>
+    <line id="Line_256" data-name="Line 256" y1="19.971" x2="20.5" transform="translate(28.5 686.5)" fill="none" stroke="#fff" stroke-width="1"/>
+  </g>
+</svg>

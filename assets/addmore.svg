@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="11.889" height="14.104" viewBox="0 0 11.889 14.104">
+  <g id="Group_59" data-name="Group 59" transform="translate(-3260.111 -37)">
+    <rect id="Rectangle_25" data-name="Rectangle 25" width="8" height="12" rx="1.5" transform="translate(3264 38)" fill="#fff"/>
+    <g id="Rectangle_26" data-name="Rectangle 26" transform="translate(3260.111 39.251) rotate(-9)" fill="none" stroke="#fff" stroke-width="0.5">
+      <rect width="8" height="12" rx="1.5" stroke="none"/>
+      <rect x="0.25" y="0.25" width="7.5" height="11.5" rx="1.25" fill="none"/>
+    </g>
+    <text id="_" data-name="+" transform="translate(3268 47)" font-size="9" font-family="SegoeUI-Light, Segoe UI" font-weight="300"><tspan x="-2.925" y="0">+</tspan></text>
+  </g>
+</svg>
