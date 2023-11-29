@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -50,7 +49,7 @@ class _ChatRoomState extends State<ChatRoom> {
         .collection("chats")
         .doc(fileName)
         .set({
-      "sendBy": _auth.currentUser!.displayName,
+      "sendBy": getUserDataController.getUserDataRxModel.value!.name,
       "message": "",
       "type": "img",
       "time": FieldValue.serverTimestamp(),
@@ -86,7 +85,7 @@ class _ChatRoomState extends State<ChatRoom> {
     String messageText = _message.text;
     if (messageText.isNotEmpty) {
       Map<String, dynamic> messages = {
-        "sendBy": _auth.currentUser!.displayName,
+        "sendBy": getUserDataController.getUserDataRxModel.value!.name,
         "message": messageText,
         "type": "text",
         "time": FieldValue.serverTimestamp(),
@@ -117,20 +116,20 @@ class _ChatRoomState extends State<ChatRoom> {
     return Scaffold(
 
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.0),
+        preferredSize: const Size.fromHeight(60.0),
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 1)],
           ),
-          child: Transform.translate(offset: Offset(0,12),
+          child: Transform.translate(offset: const Offset(0,12),
             child: Row(
               children: [
                 IconButton(
                   onPressed: () {
                     Get.back();
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.arrow_back,
                     color: Colors.black,
                     size: 16,
@@ -148,7 +147,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     SizedBox(height: 4.5.h),
                     Text(
                       widget.userMap["name"] ?? "",
-                      style: TextStyle(color: Colors.black, fontSize: 12),
+                      style: const TextStyle(color: Colors.black, fontSize: 12),
                     ),
                     SizedBox(height: 1.h),
                     Text(
@@ -173,10 +172,10 @@ class _ChatRoomState extends State<ChatRoom> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => CallHistory()),
+                                  builder: (context) => const CallHistory()),
                             );
                           },
-                          icon: Icon(Icons.call, color: Colors.blue),
+                          icon: const Icon(Icons.call, color: Colors.blue),
                         ),),
                     ),
                     IconButton(
@@ -184,7 +183,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         // Handle video icon tap
                         // Add your video functionality here
                       },
-                      icon: Icon(Icons.videocam_rounded, color: Colors.blue),
+                      icon: const Icon(Icons.videocam_rounded, color: Colors.blue),
                     ),
                   ],
                 )
@@ -245,7 +244,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       // Allow the TextField to expand vertically
                       decoration: InputDecoration(
 
-                        hintText: "Type your message",hintStyle: TextStyle(fontSize: 12),
+                        hintText: "Type your message",hintStyle: const TextStyle(fontSize: 12),
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min, // Ensure buttons take minimum space
                           children: [
@@ -254,12 +253,12 @@ class _ChatRoomState extends State<ChatRoom> {
                             //   onPressed: () => getImage(),
                             // ),
                             InkWell(onTap:()=>getImage(),
-                                child: Icon(Icons.image)),
+                                child: const Icon(Icons.image)),
                             SizedBox(width: 2.h,),
                             SvgPicture.asset("assets/Bold-Voice 2.svg"),
                             IconButton(
                               onPressed: onSendMessage,
-                              icon: Icon(Icons.send),
+                              icon: const Icon(Icons.send),
                             ),
                           ],
                         ),

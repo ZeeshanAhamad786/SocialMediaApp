@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -5,15 +8,16 @@ import 'package:get/get.dart';
 import '../../../Controllers/GetuserdataDataController.dart';
 import '../../../Controllers/ProfileController.dart';
 
+import '../../../ViewModels/chatViewModel.dart';
 import '../../../Widgets/CustomButton.dart';
 import '../../../Widgets/PicPost_Widget.dart';
 import '../../../Widgets/PostFeedScreenForProfileScreen.dart';
+import '../../Chat screens/ChatRoomScreen.dart';
 import '../Home/PostsFeedScreen.dart';
 import 'All_Tab.dart';
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
 import 'Profile_MoreButton.dart';
-
 
 class Profile extends StatefulWidget {
   final bool otherUserProfile;
@@ -25,13 +29,27 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  // String currentUserId = ''; // Add this line to get the current user ID
+  // String chatRoomId = '';
+  // Map<String, dynamic> userMap = {};
   final ProfileController controller = Get.put(ProfileController());
 
-  GetUserDataController getUserDataController =
-  Get.put(GetUserDataController());
- // Create and register a new instance of GetUserDataController
+  GetUserDataController getUserDataController = Get.put(GetUserDataController());
+  // FirebaseAuth _auth = FirebaseAuth.instance;
+  //
+  // // Function to generate a chat room ID
+  // String generateChatRoomId(String user1, String user2) {
+  //   if (user1[0].toLowerCase().codeUnits[0] > user2[0].toLowerCase().codeUnits[0]) {
+  //     return "$user1$user2";
+  //   } else {
+  //     return "$user2$user1";
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
+    // Add this line to get the current user ID
+    // currentUserId = _auth.currentUser?.uid ?? '';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -42,47 +60,49 @@ class _ProfileState extends State<Profile> {
             SliverAppBar(
               backgroundColor: Colors.white,
               leading: Padding(
-                    padding: const EdgeInsets.only(left: 15.0, top: 27),
-                    child: IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          CupertinoIcons.left_chevron,
-                          color: Colors.black,
-                        ),
-                    iconSize: 18,),
+                padding: const EdgeInsets.only(left: 15.0, top: 27),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    CupertinoIcons.left_chevron,
+                    color: Colors.black,
                   ),
+                  iconSize: 18,
+                ),
+              ),
               automaticallyImplyLeading: false,
               expandedHeight: 400,
               pinned: true,
               title: innerBoxIsScrolled && (widget.otherUserProfile || !widget.otherUserProfile)
                   ? Padding(
-                    padding: const EdgeInsets.only(top: 26.0),
-                    child: Row(
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-
-                          ],
-                        ),
-                        Expanded(child: Align(
-                            alignment: Alignment.centerRight,
-                            child: widget.otherUserProfile ? Container(
-                                height: 25,
-                                width: 80,
-                                child: CustomButton(text: 'Follow', onPressed: () {  },)) :
-
-
-                            IconButton(icon: const Icon(Icons.more_vert), onPressed: () {  },iconSize: 20,)
-                        ))
-                      ],
+                padding: const EdgeInsets.only(top: 26.0),
+                child: Row(
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [],
                     ),
-                  )
+                    Expanded(
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: widget.otherUserProfile
+                              ? Container(
+                              height: 25,
+                              width: 80,
+                              child: CustomButton(
+                                  text: 'Follow', onPressed: () {}))
+                              : IconButton(
+                            icon: const Icon(Icons.more_vert),
+                            onPressed: () {},
+                            iconSize: 20,
+                          )),
+                    )
+                  ],
+                ),
+              )
                   : null,
-
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: BoxDecoration(
@@ -106,9 +126,12 @@ class _ProfileState extends State<Profile> {
                         Container(
                           height: 170,
                           width: double.infinity,
-                          decoration:  BoxDecoration(
+                          decoration: BoxDecoration(
                               image: DecorationImage(
-                                  image: NetworkImage(getUserDataController.getUserDataRxModel.value!.backgroundImage,),
+                                  image: NetworkImage(
+                                    getUserDataController
+                                        .getUserDataRxModel.value!.backgroundImage,
+                                  ),
                                   fit: BoxFit.cover),
                               borderRadius: BorderRadius.only(
                                   bottomRight: Radius.circular(25),
@@ -132,8 +155,9 @@ class _ProfileState extends State<Profile> {
                                       context: context,
                                       builder: (BuildContext context) =>
                                           Profile_MoreButton(
-                                        otherUserProfile: widget.otherUserProfile,
-                                      ),
+                                            otherUserProfile:
+                                            widget.otherUserProfile,
+                                          ),
                                     );
                                   },
                                   icon: const Icon(
@@ -153,7 +177,9 @@ class _ProfileState extends State<Profile> {
                                     alignment: Alignment.centerLeft,
                                     child: ProfilePicWidget(
                                       picType: 'network',
-                                      getUserDataController.getUserDataRxModel.value!.profileimage,
+                                      getUserDataController
+                                          .getUserDataRxModel.value!
+                                          .profileimage,
                                       95,
                                       95,
                                     ),
@@ -168,9 +194,9 @@ class _ProfileState extends State<Profile> {
                                     child: Row(
                                       children: [
                                         Text(
-
-                                          getUserDataController.getUserDataRxModel.value?.name ?? '', // Use null-aware operators
-
+                                          getUserDataController
+                                              .getUserDataRxModel.value?.name ??
+                                              '', // Use null-aware operators
                                           style: const TextStyle(
                                             color: Color(0xff3EA7FF),
                                             fontWeight: FontWeight.w500,
@@ -186,7 +212,28 @@ class _ProfileState extends State<Profile> {
                                                 width: 95,
                                                 child: CustomButton(
                                                   text: 'Message',
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    // String roomId = generateChatRoomId(
+                                                    //     currentUserId,
+                                                    //     userMap["name"] ??
+                                                    //         "N/A");
+                                                    //
+                                                    // log(userMap["name"]
+                                                    //     .toString() +
+                                                    //     _auth.currentUser!
+                                                    //         .displayName
+                                                    //         .toString());
+
+                                                    // Navigator.push(
+                                                    //   context,
+                                                    //   MaterialPageRoute(
+                                                    //       builder: (_) =>
+                                                    //           ChatRoom(
+                                                    //             chatRoomId: roomId,
+                                                    //             userMap: userMap,
+                                                    //           )),
+                                                    // );
+                                                  },
                                                 ),
                                               ),
                                             ),
@@ -230,8 +277,10 @@ class _ProfileState extends State<Profile> {
                                   child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      getUserDataController.getUserDataRxModel.value!.bio,
-                                      style: const TextStyle(fontWeight: FontWeight.w500,
+                                      getUserDataController
+                                          .getUserDataRxModel.value!.bio,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.black,
                                         fontSize: 13,
                                       ),
@@ -266,7 +315,8 @@ class _ProfileState extends State<Profile> {
                               ],
                             ),
                             const SizedBox(height: 60),
-                            if (widget.otherUserProfile) const SizedBox(height: 20),
+                            if (widget.otherUserProfile)
+                              const SizedBox(height: 20),
                           ],
                         ),
                       ],
@@ -300,7 +350,6 @@ class _ProfileState extends State<Profile> {
                   saved_posts_Screen: false,
                   ispersonalpost: !widget.otherUserProfile,
                 ),
-
                 All_Tab(userprofile: controller.userProfile.value),
                 PostFeedScreen(
                   saved_posts_Screen: false,

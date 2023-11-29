@@ -91,7 +91,8 @@ class _PasswordScreenState extends State<PasswordScreen> {
                             decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(5),
-                                border: Border.all(color: Colors.blue)),
+                                border:
+                                Border.all(color: Colors.blue)),
                             child: const Icon(Icons.check,
                                 color: Colors.white, size: 15),
                           )
@@ -106,7 +107,8 @@ class _PasswordScreenState extends State<PasswordScreen> {
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      borderSide:
+                      BorderSide(color: Colors.grey.withOpacity(0.3)),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     filled: true,
@@ -118,14 +120,23 @@ class _PasswordScreenState extends State<PasswordScreen> {
                 ),
                 SizedBox(height: Get.height * 0.09),
                 TextButton(
-                  onPressed: () {
-                    if (isPasswordValid(registerVM.passwordController.value.text)) {
-                      registerVM.signUp();
+                  onPressed: () async {
+                    if (isPasswordValid(
+                        registerVM.passwordController.value.text)) {
+                      // Set loading to true before starting the signup process
+                      registerVM.loading.value = true;
 
-                      // Get.to(() => PickProfilePicture());
+                      // Simulate some async task (replace it with your signup logic)
+                      await Future.delayed(Duration(seconds: 2));
+
+                      // Set loading back to false after completing the process
+                      registerVM.loading.value = false;
+
                       // Continue to the next screen or perform other actions
+                      registerVM.signUp();
                     } else {
-                      Get.snackbar('Error', 'Password must be at least 8 characters long');
+                      Get.snackbar('Error',
+                          'Password must be at least 8 characters long');
                     }
                   },
                   child: Container(
@@ -142,9 +153,14 @@ class _PasswordScreenState extends State<PasswordScreen> {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                     child: Center(
-                      child: Text(
+                      child: registerVM.loading.value
+                          ? CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                          : Text(
                         "Next",
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style:
+                        TextStyle(color: Colors.white, fontSize: 14),
                       ),
                     ),
                   ),

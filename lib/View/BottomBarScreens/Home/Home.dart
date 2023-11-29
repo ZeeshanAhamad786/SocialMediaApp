@@ -13,11 +13,8 @@ import '../../Chat screens/CallBalance.dart';
 import '../../Chat screens/MainChatScreens.dart';
 import '../../Chat screens/NotificationScreen.dart';
 import '../../Chat screens/PhoneTab.dart';
-import '../../CreatePost/CreatePost.dart';
+import '../../Chat screens/mainchatHomeScreen.dart';
 import '../../CreatePost/UploadFeed_Dialog.dart';
-
-import '../Profile/ProfileWidgets.dart';
-
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class Home extends StatefulWidget {

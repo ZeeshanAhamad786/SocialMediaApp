@@ -26,7 +26,7 @@ class _SignUpState extends State<SignUp> {
       setState(() {
         _selectedDate = picked;
         registerVM.dobController.value.text =
-        "${picked.day}-${picked.month}-${picked.year}"; // Update the text field with the selected date
+        "${picked.day}-${picked.month}-${picked.year}";
       });
     }
   }
@@ -35,7 +35,8 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Form(
       key: registerVM.globalSignUpKey,
-      child: Scaffold(backgroundColor: Colors.white,
+      child: Scaffold(
+        backgroundColor: Colors.white,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: SingleChildScrollView(
@@ -101,9 +102,10 @@ class _SignUpState extends State<SignUp> {
                   onTap: () => _selectDate(context),
                   child: Container(
                     height: 38,
-                    width: MediaQuery.of(context).size.width ,
+                    width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border:
+                      Border.all(color: Colors.grey.withOpacity(0.3)),
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: Padding(
@@ -113,55 +115,70 @@ class _SignUpState extends State<SignUp> {
                         children: [
                           Text(
                             '${_selectedDate.day}-${_selectedDate.month}-${_selectedDate.year}',
-                            style: const TextStyle(fontSize: 10, color: Color(0xff707070)),
+                            style: const TextStyle(
+                                fontSize: 10, color: Color(0xff707070)),
                           ),
-
                         ],
                       ),
                     ),
                   ),
                 ),
-
                 SizedBox(
                   height: Get.height * 0.07,
                 ),
-                TextButton(
-                  onPressed: () {
-                    if (registerVM.nameController.value.text.isEmpty ||
-                        registerVM.emailController.value.text.isEmpty ||
-                        registerVM.dobController.value.text.isEmpty) {
-                      // Show an error message or snackbar indicating that all fields are required
-                      // You can use Get.snackbar or any other method to display the error message
-                      Get.snackbar('Error', 'All fields are required');
+                Obx(
+                      () => TextButton(
+                    onPressed: () async {
+                      if (registerVM.nameController.value.text.isEmpty ||
+                          registerVM.emailController.value.text.isEmpty ||
+                          registerVM.dobController.value.text.isEmpty) {
+                        Get.snackbar('Error', 'All fields are required');
+                      } else {
+                        // Set loading to true before starting the signup process
+                        registerVM.loading.value = true;
 
-                    } else {
-                      print("SignUp Successful");
-                     Navigator.push(context, MaterialPageRoute(builder: (_)=>PasswordScreen()));
+                        // Simulate some async task (replace it with your signup logic)
+                        await Future.delayed(Duration(seconds: 2));
 
-                    }
-                  },
-                  child: Container(
-                    height: 40,
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    decoration: const BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey,
-                          blurRadius: 2.5,
+                        // Set loading back to false after completing the process
+                        registerVM.loading.value = false;
+
+                        print("SignUp Successful");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PasswordScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      decoration: const BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 2.5,
+                          ),
+                        ],
+                        color: Color(0xffAC83F6),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      child: Center(
+                        child: registerVM.loading.value
+                            ? CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                            : Text(
+                          "Next",
+                          style: TextStyle(
+                              color: Colors.white, fontSize: 13),
                         ),
-                      ],
-                      color: Color(0xffAC83F6),
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Next",
-                        style: TextStyle(color: Colors.white, fontSize: 13),
                       ),
                     ),
                   ),
                 ),
-
               ],
             ),
           ),

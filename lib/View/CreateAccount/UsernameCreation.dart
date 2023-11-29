@@ -9,7 +9,9 @@ import 'package:socialmediaapp/View/Chat%20screens/MainChatScreens.dart';
 import 'package:socialmediaapp/View/StarterScreens/ContinueWithGoogle.dart';
 import 'package:socialmediaapp/ViewModels/signUpViewModel.dart';
 
+import '../../Components/BottomNavigationBar/MyBottomNavigationBar.dart';
 import '../../Widgets/CustomButton.dart';
+import '../Chat screens/ContactListScreen.dart';
 import 'ContactsPermission.dart';
 
 class UsernameCreation extends StatefulWidget {
@@ -95,16 +97,6 @@ class _UsernameCreationState extends State<UsernameCreation> {
                           borderRadius: BorderRadius.circular(30))),
                 ),
               ),
-              SizedBox(height: 5,),
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('@rub1487, @abrar5486',
-                    style: TextStyle(color: Colors.blue, fontSize: 11),)),
-              SizedBox(height: 2,),
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Show more',
-                    style: TextStyle(color: Colors.blue, fontSize: 11),)),
               SizedBox(
                 height: 30,
               ),
@@ -141,7 +133,8 @@ class _UsernameCreationState extends State<UsernameCreation> {
                         'userName': registerVM.userNameController.value.text,
 
                       },);
-                      Get.to(()=>ContinueWithGoogle());
+                      Get.to(() => ContactListScreen());
+                      // Get.offAll(() => BottomNavBarV2());
                     }
                   },
                   //   onPressed: ()=>registerVM.signUp(),

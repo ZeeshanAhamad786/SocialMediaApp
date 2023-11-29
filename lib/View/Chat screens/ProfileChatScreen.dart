@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:socialmediaapp/View/Chat%20screens/CallHistory.dart';
-import 'package:socialmediaapp/View/Chat%20screens/contactlist.dart';
+import 'package:socialmediaapp/View/Chat%20screens/ContactListScreen.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../Controllers/GetuserdataDataController.dart';

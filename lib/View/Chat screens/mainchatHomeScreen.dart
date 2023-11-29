@@ -1,31 +1,25 @@
 import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth if not imported
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
 
-import '../../Controllers/GetuserdataDataController.dart';
-import 'ProfileChatScreen.dart';
+import 'ChatRoomScreen.dart';
 
-
-class ContactList extends StatefulWidget {
-  ContactList({Key? key}) : super(key: key);
+class MainChatHomeScreen extends StatefulWidget {
+  const MainChatHomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<ContactList> createState() => _ContactListState();
+  State<MainChatHomeScreen> createState() => _MainChatHomeScreenState();
 }
 
-class _ContactListState extends State<ContactList>  with WidgetsBindingObserver{
+class _MainChatHomeScreenState extends State<MainChatHomeScreen>  with WidgetsBindingObserver{
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore =FirebaseFirestore.instance;
   late Map<String, dynamic> userMap = {};
   bool isloading = false;
   final TextEditingController _search = TextEditingController();
-  GetUserDataController getUserDataController =
-  Get.put(GetUserDataController());
-
-
   @override
   void initState (){
     super.initState();
@@ -61,50 +55,32 @@ class _ContactListState extends State<ContactList>  with WidgetsBindingObserver{
   }
 
   Future<void> onSearch() async {
-    try {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    setState(() {
+      isloading = true;
+    });
+
+    await _firestore
+        .collection("users")
+        .where("email", isEqualTo: _search.text)
+        .get()
+        .then((value) {
       setState(() {
-        isloading = true;
-      });
-
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
-          .collection("users")
-          .where("email", isEqualTo: _search.text)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        setState(() {
-          userMap = querySnapshot.docs[0].data() ?? {}; // Check for null
-          isloading = false;
-        });
-
-        // Update status
-        setStatus("Online");
-
-        print("UserMap: $userMap");
-      } else {
-        setState(() {
-          userMap = {}; // No matching user found
-          isloading = false;
-        });
-        print("No user found");
-      }
-    } catch (e) {
-      setState(() {
-        userMap = {}; // Handle the error case
+        userMap = value.docs.isNotEmpty
+            ? value.docs[0].data()
+            : {}; // Update userMap or set it to an empty map if there are no results
         isloading = false;
       });
-      print("Error: $e");
-    }
+      print(userMap);
+    });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Email Account"),
+        title: Text("HELLO"),
       ),
       body: isloading
           ? Center(
@@ -140,51 +116,38 @@ class _ContactListState extends State<ContactList>  with WidgetsBindingObserver{
             ),
           ),
           SizedBox(height: size.height / 20),
-          userMap != null
+          userMap !=null
               ? ListTile(
             onTap: () {
-              if (userMap != null &&
-                  userMap["name"] != null &&
-                  userMap["email"] != null) {
-                String roomId = chatRoomId(
-                    getUserDataController.getUserDataRxModel.value!.name,
-                    userMap["name"] ?? "N/A");
+              String roomId = chatRoomId(
+                  _auth.currentUser!.displayName ?? "N/A",
+                  userMap["name"] ?? "N/A");
 
+              log(userMap["name"].toString() + _auth.currentUser!.displayName.toString());
 
-                log(roomId);
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => chatProfile(
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => ChatRoom(
                       chatRoomId: roomId,
                       userMap: userMap,
-                    ),
-                  ),
-                );
-              } else {
-                // Handle the case where required fields are missing or null
-                print("User data is incomplete");
-              }
+                    )),
+              );
             },
-
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(userMap["photoUrl"] ?? ""),
-            ),
+            leading: Icon(Icons.account_box, color: Colors.black),
             title: Text(userMap["name"] ?? "N/A",
-                style:  TextStyle(color: Colors.black)),
+                style: TextStyle(color: Colors.black)),
             subtitle: Text(userMap["email"] ?? "N/A",
                 style: TextStyle(color: Colors.black)),
             trailing: Icon(Icons.chat, color: Colors.black),
           )
-              : Container(),
-
+              : Container()
         ],
       ),
       floatingActionButton:FloatingActionButton(
         child:  Icon(Icons.group),
         onPressed: () {
-
+          // Navigator.push(context, MaterialPageRoute(builder: (_)=>GroupChatMainChatHomeScreen()));
         },
       ) ,
     );
