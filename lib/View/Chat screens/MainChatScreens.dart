@@ -85,21 +85,6 @@ class _MainChatScreensState extends State<MainChatScreens> {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< Updated upstream
-    final size = MediaQuery.of(context).size;
-    return Obx(() => Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(100.0),
-        child: Container(
-          decoration: const BoxDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 6, top: 40),
-                  child: Row(
-=======
     int zeeshan=999;
     return SafeArea(
       child: Scaffold(
@@ -117,7 +102,6 @@ class _MainChatScreensState extends State<MainChatScreens> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Column(
->>>>>>> Stashed changes
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 6,top: 8),
@@ -275,6 +259,6 @@ class _MainChatScreensState extends State<MainChatScreens> {
             ],
           )
       ),
-    ));
+    );
   }
 }
