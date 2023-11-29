@@ -14,7 +14,6 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import '../Models/CreatePostModel.dart';
 
 
-import '../Models/postModel.dart';
 import 'GetuserdataDataController.dart';
 
 // Define the CreatePostController class
@@ -178,48 +177,7 @@ class CreatePostController extends GetxController {
       print("Error removing like from Realtime Database: $e");
     }
   }
-
-
-  // List to store user posts
-  RxList<CreatePostModel> postsList = RxList<CreatePostModel>();
-
-  // Method to get all users posts from Firestore
-  Future<void> getAllPosts() async {
-    try {
-      // Listen for real-time updates on the 'userPosts' collection for all users
-      FirebaseFirestore.instance
-          .collectionGroup('userPosts').orderBy('timestamp',descending: true)
-          .snapshots()
-          .listen((QuerySnapshot querySnapshot) {
-        // Clear the existing posts list
-        postsList.clear();
-
-        // Iterate through the retrieved documents and convert them to PostModel
-        querySnapshot.docs.forEach((doc) async {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          try {
-            // Create a post model
-            CreatePostModel post = CreatePostModel.fromMap(data);
-
-            // Fetch likes for the post
-            await fetchLikesForPost(post);
-
-            // Add the post to the list
-            postsList.add(post);
-          } catch (e) {
-            print("Error converting document to CreatePostModel: $e");
-          }
-        });
-
-        // Print the number of posts retrieved (for debugging)
-        print("Number of posts retrieved from all users: ${postsList.length}");
-      });
-    } catch (e) {
-      // Handle any errors that may occur during the process
-      print("Error fetching posts: $e");
-      Get.snackbar('Error', 'Failed to get posts: $e');
-    }
-  }
+// here We gets Likes of Posts
   Future<void> fetchLikesForPost(CreatePostModel post) async {
     try {
       // Fetch likes for the post from Realtime Database
@@ -245,6 +203,73 @@ class CreatePostController extends GetxController {
       print("Error fetching likes for post: $e");
     }
   }
+// add Comments in Real Time Database
+  void addCommentToDatabase(String userProfileImage, String postId, String userUid, String comment, String userName) {
+    try {
+      final commentReference = FirebaseDatabase.instance.reference().child('comments').child(postId).push();
+      final String commentId = commentReference.key!; // Unique key for the comment
+
+      commentReference.set({
+        'userId': userUid,
+        'comment': comment,
+        'timestamp': ServerValue.timestamp, // Use ServerValue.timestamp for the server timestamp
+        'userProfileImage': userProfileImage, // Add the user profile image URL
+        'userName': userName, // Add the user name
+      });
+
+      print('Comment added with postId: $postId, commentId: $commentId, userId: $userUid');
+    } catch (e) {
+      print("Error adding comment to Realtime Database: $e");
+    }
+  }
+
+
+// Assuming you have a CommentModel class
+
+
+
+  RxList<CreatePostModel> postsList = RxList<CreatePostModel>();
+
+  // Method to get all users posts from Firestore
+  Future<void> getAllPosts() async {
+    try {
+      // Listen for real-time updates on the 'userPosts' collection for all users
+      FirebaseFirestore.instance
+          .collectionGroup('userPosts').orderBy('timestamp',descending: true)
+          .snapshots()
+          .listen((QuerySnapshot querySnapshot) {
+        // Clear the existing posts list
+        postsList.clear();
+
+        // Iterate through the retrieved documents and convert them to PostModel
+        querySnapshot.docs.forEach((doc) async {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          try {
+            // Create a post model
+            CreatePostModel post = CreatePostModel.fromMap(data);
+
+            // Fetch likes for the post
+            await fetchLikesForPost(post);
+            //Fetch Comments for All Posts
+
+
+            // Add the post to the list
+            postsList.add(post);
+          } catch (e) {
+            print("Error converting document to CreatePostModel: $e");
+          }
+        });
+
+        // Print the number of posts retrieved (for debugging)
+        print("Number of posts retrieved from all users: ${postsList.length}");
+      });
+    } catch (e) {
+      // Handle any errors that may occur during the process
+      print("Error fetching posts: $e");
+      Get.snackbar('Error', 'Failed to get posts: $e');
+    }
+  }
+
 
 
 

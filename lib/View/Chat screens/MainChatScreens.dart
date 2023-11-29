@@ -106,7 +106,7 @@ class _MainChatScreensState extends State<MainChatScreens>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Scaffold(
+    return Obx(() => Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(100.0),
         child: Container(
@@ -259,6 +259,6 @@ class _MainChatScreensState extends State<MainChatScreens>
 
         ],
       ),
-    );
+    ));
   }
 }

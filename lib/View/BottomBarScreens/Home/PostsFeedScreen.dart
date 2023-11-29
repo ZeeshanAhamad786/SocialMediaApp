@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:socialmediaapp/View/CreatePost/CommentsScreen.dart';
 
 
 import '../../../Controllers/CreatePostController.dart';
@@ -90,8 +91,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   ];
 
 
-  bool ispressed = false;
-  RxInt currentIndex=0.obs;
+
 String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
   CreatePostController createPostController =
   Get.put(CreatePostController());
@@ -279,11 +279,23 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                      ),),
 
                       const SizedBox(width: 10),
-                      SvgPicture.asset(
-                        'assets/comment.svg',
-                        height: 20,
-                        width: 20,
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) {
+                            // Assuming you have access to the current post in the loop
+                            var post = createPostController.postsList[index];
+
+                            // Pass the postId to CommentsScreen
+                            return CommentsScreen(postId: post.postId);
+                          }));
+                        },
+                        child: SvgPicture.asset(
+                          'assets/comment.svg',
+                          height: 20,
+                          width: 20,
+                        ),
                       ),
+
                       const SizedBox(width: 5),
                       const Text(
                         "300",

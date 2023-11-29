@@ -38,6 +38,7 @@ dependencies:
   flutter_svg:
   get:
   responsive_sizer: ^3.2.0
+  http:
   firebase_database: ^10.3.5
   smooth_page_indicator: ^1.1.0
   flutter_dialpad: ^1.0.5
