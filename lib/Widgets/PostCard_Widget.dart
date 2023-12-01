@@ -47,7 +47,12 @@ class _PostCardState extends State<PostCard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Profile(otherUserProfile: !widget.ispersonalpost), // Replace SecondScreen with the screen you want to navigate to.
+                        builder: (context) => Profile(userId:  createPostController.postsList.first.
+                        userId,postId:createPostController.postsList.first.
+                        postId ,
+                            otherUserProfile: !widget.ispersonalpost,profileImage:  createPostController.postsList.first.
+                        userProfileImage,profileName: createPostController.postsList.first.
+                        username.toString() ), // Replace SecondScreen with the screen you want to navigate to.
                       ),
                     );
                   },

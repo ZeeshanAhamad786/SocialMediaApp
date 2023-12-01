@@ -128,37 +128,6 @@ class ProfileEditController extends GetxController {
     }
   }
 
-  // Future<void> uploadBackgroundImageToFirebaseStorage(
-  //     image, {
-  //       profileImage,
-  //       userName,
-  //       userDOB,
-  //       userBio,
-  //       userLocation,
-  //     }) async {
-  //   try {
-  //     final storage = FirebaseStorage.instance;
-  //
-  //     final fileName = '${auth.currentUser!.uid}_background_image.jpg';
-  //     final Reference storageRef =
-  //     storage.ref().child('background_images_folder/$fileName');
-  //     await storageRef.putFile(image);
-  //
-  //     backgroundImage = await storageRef.getDownloadURL();
-  //     log('Download URL for $fileName: $backgroundImage');
-  //
-  //     await updateUserData(
-  //       profileimage: null, // Pass null or a default value since it's not used for background images
-  //       userName: userName,
-  //       userBio: userBio,
-  //       userLocation: userLocation,
-  //       userDOB: userDOB,
-  //       backgroundImage: backgroundImage,
-  //     );
-  //   } catch (e) {
-  //     log('Error uploading background image to Firebase Storage: $e');
-  //   }
-  // }
 
   var  selectedCoverImage= Rx<File?>(null);
   var selectedProfileImage = Rx<File?>(null);

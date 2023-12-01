@@ -88,7 +88,9 @@ class MyDrawer extends StatelessWidget {
                     onTap: () {
                       if(index==0){
                         Navigator.pop(context);
-                       Get.to(Profile(otherUserProfile: false,)) ;
+                       Get.to(
+                           Profile(postId: '',
+                             otherUserProfile: false,profileName:  getUserDataController.getUserDataRxModel.value?.name ?? '',profileImage:   getUserDataController.getUserDataRxModel.value!.profileimage,userId:  getUserDataController.getUserDataRxModel.value?.userId ?? '',)) ;
                       }
                       if(index==1){
                         Navigator.pop(context);

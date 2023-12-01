@@ -1,14 +1,19 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:socialmediaapp/Models/commentsModel.dart';
 
 import '../../Controllers/CreatePostController.dart';
 import '../../Controllers/GetuserdataDataController.dart';
-import '../../Models/CreatePostModel.dart';
+
 
 class CommentsScreen extends StatefulWidget {
-  const CommentsScreen({super.key,required String postId});
+  final String postId;
+List postComments=[];
+  CommentsScreen({required this.postId});
 
   @override
   State<CommentsScreen> createState() => _CommentsScreenState();
@@ -16,12 +21,13 @@ class CommentsScreen extends StatefulWidget {
 
 class _CommentsScreenState extends State<CommentsScreen> {
   TextEditingController commentController = TextEditingController();
-  String currentUserId = FirebaseAuth.instance.currentUser!.uid.toString();
   CreatePostController createPostController = Get.put(CreatePostController());
-  CreatePostModel? selectedPost;
+  GetUserDataController getUserDataController = Get.put(GetUserDataController());
 
-  GetUserDataController getUserDataController =
-  Get.put(GetUserDataController());
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,71 +37,54 @@ class _CommentsScreenState extends State<CommentsScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
-          "Comments (20)",
+        title:Obx(() =>  Text(
+          'Comments (${
+              createPostController.comments
+                  .where((comment) => comment.postId == widget.postId)
+                  .toList().length
+          })',
           style: TextStyle(
             fontSize: 18,
             color: Colors.grey.shade900,
             fontWeight: FontWeight.bold,
           ),
-        ),
+        ),)
       ),
       body: Column(
         children: [
           const Divider(color: Colors.grey, thickness: 1,),
           Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: 20,
-              itemBuilder: (context, index) {
-                var post = createPostController.postsList[index];
-                return Column(
-                  children: [
-                    const ListTile(
-                      leading: CircleAvatar(),
-                      title: Text("Ali Raza"),
-                      subtitle: Text("My Name Is Ali am Working On Socail Media App"),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            createPostController.toggleLikeForPost(post.postId);
-                          },
-                          child: Obx(() => Icon(
-                            CupertinoIcons.heart_fill,
-                            size: 20,
-                            color: post.likes.any((like) => like.userId == currentUserId)
-                                ? CupertinoColors.systemPink
-                                : CupertinoColors.systemGrey,
-                          )),
-                        ),
-                        const SizedBox(width: 5),
-                        Obx(() => Text(
-                          post.likes.length.toString(),
-                          style: const TextStyle(fontWeight: FontWeight.w300),
-                        )),
-                        const SizedBox(width: 15),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              selectedPost = post;
-                            });
-                          },
-                          child: Text(
-                            "Reply",
-                            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Divider(color: Colors.grey.withOpacity(0.2), thickness: 1,),
-                  ],
-                );
+            child: FutureBuilder(
+              future: createPostController.fetchAllComments(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Error loading comments'));
+                } else {
+                  // Filter comments based on postId
+                  List<commentModel1> postComments = createPostController.comments
+                      .where((comment) => comment.postId == widget.postId)
+                      .toList();
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: postComments.length,
+                    itemBuilder: (context, index) {
+                      var comment = postComments[index];
+                      log('Comments: ${comment.userProfileImage}');
+                      return ListTile(
+                        leading: CircleAvatar(backgroundImage: NetworkImage(comment.userProfileImage),),
+                        title: Text(comment.userName),
+                        subtitle: Text(comment.comment),
+                      );
+                    },
+                  );
+                }
               },
-            ),
+            )
+
           ),
           const SizedBox(height: 8,),
           Padding(
@@ -106,20 +95,20 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 suffixIcon: IconButton(
                   onPressed: () {
                     final String commentText = commentController.text;
-                    if (commentText.isNotEmpty ) {
+
+                    if (commentController.text.isNotEmpty) {
+                    setState(() {
                       createPostController.addCommentToDatabase(
                         getUserDataController.getUserDataRxModel.value!.profileimage,
-                        createPostController.postsList.first.postId.isNotEmpty
-                            ? createPostController.postsList.first.postId
-                            : "No Description",
+                        widget.postId,
                         FirebaseAuth.instance.currentUser!.uid,
                         commentText,
-                        getUserDataController.getUserDataRxModel.value!.name.toString(),
+                        getUserDataController.getUserDataRxModel.value!.name,
                       );
-
-                      commentController.clear();
-
+                    });
                     }
+
+                    commentController.clear();
                   },
                   icon: const Icon(Icons.send, size: 18),
                 ),
@@ -137,4 +126,3 @@ class _CommentsScreenState extends State<CommentsScreen> {
     );
   }
 }
-

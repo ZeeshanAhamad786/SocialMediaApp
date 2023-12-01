@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:socialmediaapp/Models/commentsModel.dart';
 
 
 import '../Models/CreatePostModel.dart';
@@ -168,6 +169,7 @@ class CreatePostController extends GetxController {
     }
   }
 
+
 // Method to remove a like from Realtime Database
   void removeLikeFromDatabase(String postId, String userUid) {
     try {
@@ -204,27 +206,51 @@ class CreatePostController extends GetxController {
     }
   }
 // add Comments in Real Time Database
+
   void addCommentToDatabase(String userProfileImage, String postId, String userUid, String comment, String userName) {
     try {
-      final commentReference = FirebaseDatabase.instance.reference().child('comments').child(postId).push();
-      final String commentId = commentReference.key!; // Unique key for the comment
-
+      final encodedPostId = Uri.encodeFull(postId);
+      final commentReference = FirebaseDatabase.instance.reference().child('comments').push();
+      final String commentId = commentReference.key!;
       commentReference.set({
+        'postId': postId,
         'userId': userUid,
         'comment': comment,
-        'timestamp': ServerValue.timestamp, // Use ServerValue.timestamp for the server timestamp
-        'userProfileImage': userProfileImage, // Add the user profile image URL
-        'userName': userName, // Add the user name
+        'timestamp': ServerValue.timestamp,
+        'userProfileImage': userProfileImage,
+        'userName': userName,
       });
-
       print('Comment added with postId: $postId, commentId: $commentId, userId: $userUid');
     } catch (e) {
       print("Error adding comment to Realtime Database: $e");
     }
   }
+  RxList<commentModel1> comments = <commentModel1>[].obs;
 
+// Fetch All Comments
+  Future<void> fetchAllComments() async {
+    DatabaseReference reference = FirebaseDatabase.instance.reference();
+    try {
+      DatabaseEvent event = await reference.child('comments').once();
+      log('Comments data: ${event.snapshot.value}');
 
-// Assuming you have a CommentModel class
+      if (event.snapshot != null && event.snapshot.value != null) {
+        var data = (event.snapshot.value as Map<dynamic, dynamic>).values.map(
+              (comment) => commentModel1.fromMap(comment),
+        ).toList();
+
+        // Now 'data' is a List<commentModel1> containing your comments
+        // Update the RxList with the fetched comments
+        comments.assignAll(data);
+
+      } else {
+        print('Snapshot is null or value is not valid');
+      }
+    } catch (e) {
+      print("Error fetching comments: $e");
+      Get.snackbar("Error", "An error occurred while fetching comments");
+    }
+  }
 
 
 

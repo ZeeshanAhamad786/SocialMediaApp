@@ -21,37 +21,37 @@ class PersonalPosts extends StatelessWidget {
           // SizedBox(height: 60,),
           Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(bottomRight: Radius.circular(20),bottomLeft: Radius.circular(20)),
+                borderRadius: const BorderRadius.only(bottomRight: Radius.circular(20),bottomLeft: Radius.circular(20)),
                 border: Border.all(color: Colors.grey.withOpacity(0.3))
             ),
             child: Column(
               children: [
-                SizedBox(height: 60,),
+                const SizedBox(height: 60,),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(onPressed: (){
                       Navigator.pop(context);
-                    }, icon: Icon(CupertinoIcons.left_chevron)),
-                    Text(
+                    }, icon: const Icon(CupertinoIcons.left_chevron)),
+                    const Text(
                       "Posts",
                       style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22),
                     ),
-                    SizedBox(height: 40, width: 40,)
+                    const SizedBox(height: 40, width: 40,)
                   ],
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10,),
+          const SizedBox(height: 10,),
           Expanded(
             child: DefaultTabController(
               length: 3,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
                     child: TabBar(
                       labelColor: Colors.black,
 
@@ -73,7 +73,7 @@ class PersonalPosts extends StatelessWidget {
                       children: [
                         PostFeedScreen(saved_posts_Screen: true, ispersonalpost: true,),
                         All_Tab(userprofile: controller.userProfile.value),
-                        Center(child: Text('Videos')),
+                        const Center(child: Text('Videos')),
                       ],
                     ),
                   ),

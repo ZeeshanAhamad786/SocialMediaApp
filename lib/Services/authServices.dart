@@ -19,6 +19,7 @@ class AuthService {
     String? photoUrl,
     String? backgroundImage,
     String? phone,
+    String? userId,
   }) async {
     var res = await firebaseAuth.createUserWithEmailAndPassword(
       email: '$email',
@@ -33,6 +34,7 @@ class AuthService {
         password: password,
         dob: dob,
         userName: userName,
+        userId: userId,
         photoUrl: photoUrl,
         backgroundImage: backgroundImage,
         phone: phone,
@@ -54,7 +56,7 @@ class AuthService {
     String? userName,
     String? photoUrl,
     String? backgroundImage,
-    String? phone,
+    String? phone, String? userId,
   }) async {
     await usersRef.doc(user!.uid).set({
       'name': name,
@@ -65,6 +67,7 @@ class AuthService {
       'backgroundImage':  backgroundImage??'',
       'dob': dob,
       'userName':userName,
+      'userId':FirebaseAuth.instance.currentUser!.uid,
       "password":password,
 
     });

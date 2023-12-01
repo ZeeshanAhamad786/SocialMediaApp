@@ -24,7 +24,7 @@ class PostFeedScreen extends StatefulWidget {
   bool saved_posts_Screen;
   final bool ispersonalpost;
 
-  PostFeedScreen({required this.saved_posts_Screen,required this.ispersonalpost});
+  PostFeedScreen({super.key, required this.saved_posts_Screen,required this.ispersonalpost});
 
   @override
   State<PostFeedScreen> createState() => _PostFeedScreenState();
@@ -139,13 +139,18 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Profile(otherUserProfile: !widget.ispersonalpost), // Replace SecondScreen with the screen you want to navigate to.
+                              builder: (context) => Profile(userId: post.userId,postId: post.postId,
+                                otherUserProfile: !widget.ispersonalpost,profileImage: post.userProfileImage,
+
+                              profileName: post.username,
+                              ), // Replace SecondScreen with the screen you want to navigate to.
                             ),
                           );
                         },
                         child: ProfilePicWidget(
                             picType: 'network',
-                            post.userProfileImage, 45, 45),
+                        post.userId==post.postId?
+                        getUserDataController.getUserDataRxModel.value!.profileimage:post.userProfileImage, 45, 45),
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -283,7 +288,7 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                         onTap: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) {
                             // Assuming you have access to the current post in the loop
-                            var post = createPostController.postsList[index];
+
 
                             // Pass the postId to CommentsScreen
                             return CommentsScreen(postId: post.postId);
@@ -297,10 +302,10 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                       ),
 
                       const SizedBox(width: 5),
-                      const Text(
-                        "300",
+                      Obx(() =>  Text(
+                        "   ${  createPostController.comments.where((comment) => comment.postId==post.postId).toList().length}",
                         style: TextStyle(fontWeight: FontWeight.w300),
-                      ),
+                      ),),
                       Expanded(
                         child: Align(
                           alignment: Alignment.centerRight,

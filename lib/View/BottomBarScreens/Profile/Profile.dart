@@ -1,19 +1,22 @@
+
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'package:get/get.dart';
+import '../../../Controllers/CreatePostController.dart';
 import '../../../Controllers/GetuserdataDataController.dart';
 import '../../../Controllers/ProfileController.dart';
 
-import '../../../ViewModels/chatViewModel.dart';
 import '../../../Widgets/CustomButton.dart';
 import '../../../Widgets/PicPost_Widget.dart';
-import '../../../Widgets/PostFeedScreenForProfileScreen.dart';
-import '../../Chat screens/ChatRoomScreen.dart';
+
+import '../../CreatePost/CommentsScreen.dart';
 import '../Home/PostsFeedScreen.dart';
+import '../Home/SharePost.dart';
 import 'All_Tab.dart';
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
@@ -22,35 +25,40 @@ import 'Profile_MoreButton.dart';
 class Profile extends StatefulWidget {
   final bool otherUserProfile;
 
-  Profile({Key? key, required this.otherUserProfile}) : super(key: key);
+  final String profileImage;
+  final String profileName;
+  final String userId;
+  final String postId;
+
+
+  const Profile({Key? key,required this.postId, required this.otherUserProfile, required this.profileImage, required this.profileName, required this.userId,}) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
-  // String currentUserId = ''; // Add this line to get the current user ID
-  // String chatRoomId = '';
-  // Map<String, dynamic> userMap = {};
+  CreatePostController createPostController = Get.put(CreatePostController());
   final ProfileController controller = Get.put(ProfileController());
 
   GetUserDataController getUserDataController = Get.put(GetUserDataController());
-  // FirebaseAuth _auth = FirebaseAuth.instance;
-  //
-  // // Function to generate a chat room ID
-  // String generateChatRoomId(String user1, String user2) {
-  //   if (user1[0].toLowerCase().codeUnits[0] > user2[0].toLowerCase().codeUnits[0]) {
-  //     return "$user1$user2";
-  //   } else {
-  //     return "$user2$user1";
-  //   }
-  // }
+  var ispersonalpost;
+
+  List<String> media = [];
+
+  addPosts() async {
+    media.clear();
+    for (var post in createPostController.postsList) {
+      if (post.userId == widget.userId) {
+        media.add(post.userPostImage);
+      }
+    }
+    log(media.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Add this line to get the current user ID
-    // currentUserId = _auth.currentUser?.uid ?? '';
-
+    addPosts();
     return Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
@@ -88,7 +96,7 @@ class _ProfileState extends State<Profile> {
                       child: Align(
                           alignment: Alignment.centerRight,
                           child: widget.otherUserProfile
-                              ? Container(
+                              ? SizedBox(
                               height: 25,
                               width: 80,
                               child: CustomButton(
@@ -129,11 +137,12 @@ class _ProfileState extends State<Profile> {
                           decoration: BoxDecoration(
                               image: DecorationImage(
                                   image: NetworkImage(
-                                    getUserDataController
-                                        .getUserDataRxModel.value!.backgroundImage,
+                                 widget.userId==   getUserDataController
+                                        .getUserDataRxModel.value!.userId?getUserDataController.getUserDataRxModel.value!.backgroundImage:
+                                     ""
                                   ),
                                   fit: BoxFit.cover),
-                              borderRadius: BorderRadius.only(
+                              borderRadius: const BorderRadius.only(
                                   bottomRight: Radius.circular(25),
                                   bottomLeft: Radius.circular(25))),
                         ),
@@ -177,9 +186,7 @@ class _ProfileState extends State<Profile> {
                                     alignment: Alignment.centerLeft,
                                     child: ProfilePicWidget(
                                       picType: 'network',
-                                      getUserDataController
-                                          .getUserDataRxModel.value!
-                                          .profileimage,
+                                    widget.profileImage,
                                       95,
                                       95,
                                     ),
@@ -194,9 +201,7 @@ class _ProfileState extends State<Profile> {
                                     child: Row(
                                       children: [
                                         Text(
-                                          getUserDataController
-                                              .getUserDataRxModel.value?.name ??
-                                              '', // Use null-aware operators
+                    widget.profileName, // Use null-aware operators
                                           style: const TextStyle(
                                             color: Color(0xff3EA7FF),
                                             fontWeight: FontWeight.w500,
@@ -207,7 +212,7 @@ class _ProfileState extends State<Profile> {
                                           Expanded(
                                             child: Align(
                                               alignment: Alignment.centerRight,
-                                              child: Container(
+                                              child: SizedBox(
                                                 height: 30,
                                                 width: 95,
                                                 child: CustomButton(
@@ -242,7 +247,7 @@ class _ProfileState extends State<Profile> {
                                           Padding(
                                             padding: const EdgeInsets.only(
                                                 left: 5.0),
-                                            child: Container(
+                                            child: SizedBox(
                                               height: 30,
                                               width: 80,
                                               child: CustomButton(
@@ -255,13 +260,13 @@ class _ProfileState extends State<Profile> {
                                           Expanded(
                                             child: Align(
                                               alignment: Alignment.centerRight,
-                                              child: Container(
+                                              child: SizedBox(
                                                 height: 30,
                                                 width: 120,
                                                 child: CustomButton(
                                                   text: 'Edit Profile',
                                                   onPressed: () {
-                                                    Get.to(ProfileEdit());
+                                                    Get.to(const ProfileEdit());
                                                   },
                                                 ),
                                               ),
@@ -276,7 +281,9 @@ class _ProfileState extends State<Profile> {
                                   padding: const EdgeInsets.only(left: 25.0),
                                   child: Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(
+                                    child: getUserDataController
+                                        .getUserDataRxModel.value!.userId==widget.userId?
+                                    Text(
                                       getUserDataController
                                           .getUserDataRxModel.value!.bio,
                                       style: const TextStyle(
@@ -285,7 +292,7 @@ class _ProfileState extends State<Profile> {
                                         fontSize: 13,
                                       ),
                                       textAlign: TextAlign.start,
-                                    ),
+                                    ):Text('data')
                                   ),
                                 ),
                               ],
@@ -295,10 +302,15 @@ class _ProfileState extends State<Profile> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Expanded(
-                                  child: Accountdata_Widget(
+                                  child: createPostController.postsList
+                                      .where((post) => post.userId == widget.userId )
+                                      .isNotEmpty
+                                      ? Accountdata_Widget(
                                     "Post",
-                                    userProfile.numberOfPosts,
-                                  ),
+                                    createPostController.postsList.length.toString(),
+                                  )
+                                      : Container(), // or any other widget you want to display when the condition is not met
+
                                 ),
                                 Expanded(
                                   child: Accountdata_Widget(
@@ -342,15 +354,233 @@ class _ProfileState extends State<Profile> {
               ),
             ),
           ],
-          body: Container(
+          body: SizedBox(
             height: 175 * controller.userProfile.value.posts.length.toDouble(),
             child: TabBarView(
               children: [
-                ListViewBuilder(
-                  saved_posts_Screen: false,
-                  ispersonalpost: !widget.otherUserProfile,
+                ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: createPostController.postsList.length,
+                  itemBuilder: (context, index) {
+                    var post = createPostController.postsList[index];
+                    if (post != null &&
+                        post.userId == widget.userId) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                InkWell(
+
+                                  child: ProfilePicWidget(widget.profileImage,
+                                    45,
+                                    45,
+                                    picType: 'network',
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      post.username.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    Text(
+                                      post.timestamp.toString(),
+                                      style:
+                                      const TextStyle(color: Colors.grey, fontSize: 11),
+                                    )
+                                  ],
+                                ),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            Stack(
+                              children: [
+                                Container(
+                                  height: 240,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(25),
+                                      topLeft: Radius.circular(5),
+                                      bottomRight: Radius.circular(5),
+                                      bottomLeft: Radius.circular(25),
+                                    ),
+                                    image: DecorationImage(
+                                      image: createPostController.postsList.isNotEmpty &&
+                                          post.userPostImage != null
+                                          ? NetworkImage(post.userPostImage)
+                                      as ImageProvider<Object>
+                                          : AssetImage('assets/profilepic.png')
+                                      as ImageProvider<Object>,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Container(
+                                      height: 20,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Center(
+                                        child: Text(
+                                          '3/10',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    createPostController.toggleLikeForPost(post.postId);
+                                  },
+                                  child: Obx(() => Icon(
+                                    CupertinoIcons.heart_fill,
+                                    size: 25,
+                                    color: post.likes.any((like) => like.userId == FirebaseAuth.instance.currentUser!.uid)
+                                        ? CupertinoColors.systemPink
+                                        : CupertinoColors.systemGrey,
+                                  )),
+                                ),
+
+
+                                const SizedBox(width: 5),
+                                Obx(() =>  Text(
+                                  post.likes.length.toString(),
+                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                ),),
+                                const SizedBox(width: 10),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                      // Assuming you have access to the current post in the loop
+
+
+                                      // Pass the postId to CommentsScreen
+                                      return CommentsScreen(postId: post.postId);
+                                    }));
+                                  },
+                                  child: SvgPicture.asset(
+                                    'assets/comment.svg',
+                                    height: 20,
+                                    width: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Obx(() =>  Text(
+                                  "   ${  createPostController.comments.where((comment) => comment.postId==post.postId).toList().length}",
+                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                ),),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: InkWell(
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(25),
+                                                topLeft: Radius.circular(
+                                                    25)), // Set circular border radius here
+                                          ),
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              MyBottomSheet(),
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/send.svg',
+                                        height: 20,
+                                        width: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                InkWell(
+                                    onTap: () {
+                                      // Toggle the postsaved state
+                                    },
+                                    child: SvgPicture.asset(
+                                      'assets/save_blue.svg',
+                                      height: 20,
+                                      width: 20,
+                                    )),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              post.description,
+                              style: const TextStyle(fontSize: 13.0),
+                            ),
+                            const SizedBox(height: 3.0),
+                            Text(
+                              '#hashtag ',
+                              style:
+                              const TextStyle(color: Color(0xff7F7F7F), fontSize: 13),
+                            ),
+                            const SizedBox(height: 16.0),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const Center(child: null);
+                    }
+                  },
                 ),
-                All_Tab(userprofile: controller.userProfile.value),
+              GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 8.0,
+                ),
+                scrollDirection: Axis.vertical,
+                itemCount: media.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return  Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      image: DecorationImage(
+                        image: NetworkImage(media[index]),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ); // or any other placeholder widget
+                },
+              ),
                 PostFeedScreen(
                   saved_posts_Screen: false,
                   ispersonalpost: !widget.otherUserProfile,

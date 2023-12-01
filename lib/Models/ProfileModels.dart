@@ -5,6 +5,7 @@ class ProfileModel {
   final location;
  final String backgroundImage;
   final String bio;
+  final String userId;
   final String numberOfPosts;
   final String numberOfFollowers;
   final String numberOfFollowings;
@@ -14,6 +15,7 @@ class ProfileModel {
     required this.profileimage,
     required this.name,
     required this.dob,
+    required this.userId,
     required this.location,
     required this.bio,
     required this.numberOfPosts,
@@ -29,6 +31,7 @@ class ProfileModel {
       profileimage: json['photoUrl'] ?? '',
       name: json['name'] ?? '',
       dob: json['dob'] ?? '',
+      userId: json['userId'] ?? '',
       location: json['userLocation'] ?? '',
       bio: json['userBio'] ?? '',
       numberOfPosts: json['numberOfPosts'] ?? '',

@@ -106,12 +106,13 @@ class _MainChatScreensState extends State<MainChatScreens> {
                       Padding(
                         padding: const EdgeInsets.only(left: 6,top: 8),
                         child: Row(
-                          children: [CircleAvatar(
+                          children: [
+                          Obx(() =>  CircleAvatar(
                             radius: 20,
                             backgroundImage:NetworkImage( getUserDataController
                                 .getUserDataRxModel.value?.profileimage ??
                                 '',),
-                          ),
+                          ),),
 
                             Expanded(
                               child: Align(

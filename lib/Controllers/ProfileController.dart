@@ -4,7 +4,7 @@ import '../Utis/firebase.dart'; // Import the Firebase instance
 
 class ProfileController extends GetxController {
   // Define your ProfileModel as an observable object
-  final Rx<ProfileModel> userProfile = ProfileModel(backgroundImage: "",
+  final Rx<ProfileModel> userProfile = ProfileModel(backgroundImage: "",userId: '',
     profileimage: 'assets/profilepic.png',
     name: "Minha Anjum",
     dob: "29/6/2002",
