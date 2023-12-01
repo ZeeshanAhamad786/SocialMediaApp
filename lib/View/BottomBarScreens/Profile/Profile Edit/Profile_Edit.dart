@@ -1,33 +1,21 @@
 import 'dart:io';
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import '../../../../Controllers/GetuserdataDataController.dart';
 import '../../../../Controllers/Profile_Edit_Controller.dart';
-
 class ProfileEdit extends StatefulWidget {
   const ProfileEdit({Key? key}) : super(key: key);
-
   @override
   State<ProfileEdit> createState() => _ProfileEditState();
 }
-
 class _ProfileEditState extends State<ProfileEdit> {
 final ProfileEditController profileEditController =Get.put(ProfileEditController(),tag: "profileEditController");
-
-
-
-  GetUserDataController getUserDataController =
-  Get.put(GetUserDataController());
-
-
+  GetUserDataController getUserDataController = Get.put(GetUserDataController());
 @override
 void initState() {
   super.initState();
-
   // Set the initial values from profileEditController
   if (profileEditController.nameController.text.isEmpty) {
     profileEditController.nameController.text =
@@ -46,17 +34,9 @@ void initState() {
         profileEditController. getUserDataController.getUserDataRxModel.value!.location.toString();
   }
 }
-
-
-
-
   @override
   Widget build(BuildContext context) {
-
-
-
-
-    return Obx(() =>  Scaffold(
+  return Obx(() =>  Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(

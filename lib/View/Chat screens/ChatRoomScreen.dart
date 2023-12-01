@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -30,6 +31,17 @@ class _ChatRoomState extends State<ChatRoom> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File? imageFile;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  Stream<DocumentSnapshot<Map<String, dynamic>>> get _userStatusStream {
+    if (_firestore != null && _auth.currentUser != null) {
+      return _firestore
+          .collection("users")
+          .doc(_auth.currentUser!.uid)
+          .snapshots();
+    } else {
+      // Return an empty stream if not initialized
+      return Stream.empty();
+    }
+  }
 
   Future getImage() async {
     ImagePicker picker = ImagePicker();
@@ -49,9 +61,8 @@ class _ChatRoomState extends State<ChatRoom> {
         .collection("chats")
         .doc(fileName)
         .set({
-      "sendBy": getUserDataController.getUserDataRxModel.value!.name,
+      "sendBy": _auth.currentUser!.uid,
       "message": "",
-      "type": "img",
       "time": FieldValue.serverTimestamp(),
     });
 
@@ -85,7 +96,7 @@ class _ChatRoomState extends State<ChatRoom> {
     String messageText = _message.text;
     if (messageText.isNotEmpty) {
       Map<String, dynamic> messages = {
-        "sendBy": getUserDataController.getUserDataRxModel.value!.name,
+        "sendBy": _auth.currentUser!.uid,
         "message": messageText,
         "type": "text",
         "time": FieldValue.serverTimestamp(),
@@ -100,7 +111,6 @@ class _ChatRoomState extends State<ChatRoom> {
       log("Enter some text");
     }
   }
-
   @override
   void initState() {
     // TODO: implement initState
@@ -116,20 +126,20 @@ class _ChatRoomState extends State<ChatRoom> {
     return Scaffold(
 
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
+        preferredSize: Size.fromHeight(60.0),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 1)],
           ),
-          child: Transform.translate(offset: const Offset(0,12),
+          child: Transform.translate(offset: Offset(0,12),
             child: Row(
               children: [
                 IconButton(
                   onPressed: () {
                     Get.back();
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back,
                     color: Colors.black,
                     size: 16,
@@ -147,14 +157,44 @@ class _ChatRoomState extends State<ChatRoom> {
                     SizedBox(height: 4.5.h),
                     Text(
                       widget.userMap["name"] ?? "",
-                      style: const TextStyle(color: Colors.black, fontSize: 12),
+                      style: TextStyle(color: Colors.black, fontSize: 12),
                     ),
-                    SizedBox(height: 1.h),
-                    Text(
-                      widget.userMap["status"] ?? "",
-                      style: TextStyle(
-                          color: Colors.black.withOpacity(0.5), fontSize: 8),
+                    SizedBox(height: 0.5.h),
+                    StreamBuilder(
+                      stream: _userStatusStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData &&
+                            snapshot.data != null) {
+                          var status =
+                          snapshot.data!['status'];
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                left: 1.0),
+                            child: Text(
+                              status == 'Online'
+                                  ? 'Online'
+                                  : 'Offline',
+                              style: TextStyle(fontSize: 12,
+                                color: status == 'Online'
+                                    ? Colors.black
+                                    : Colors.red,
+
+                              ),
+                            ),
+                          );
+                        } else {
+                          return SizedBox();
+                        }
+                      },
                     ),
+                    // Text(
+                    //   widget.userMap["status"] ?? "",
+                    //   style: TextStyle(
+                    //       color: Colors.black.withOpacity(0.5), fontSize: 8),
+                    // ),
+
+
+
                   ],
                 ),
                 Expanded(child: Container()),
@@ -172,10 +212,10 @@ class _ChatRoomState extends State<ChatRoom> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const CallHistory()),
+                                  builder: (context) => CallHistory()),
                             );
                           },
-                          icon: const Icon(Icons.call, color: Colors.blue),
+                          icon: Icon(Icons.call, color: Colors.blue),
                         ),),
                     ),
                     IconButton(
@@ -183,7 +223,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         // Handle video icon tap
                         // Add your video functionality here
                       },
-                      icon: const Icon(Icons.videocam_rounded, color: Colors.blue),
+                      icon: Icon(Icons.videocam_rounded, color: Colors.blue),
                     ),
                   ],
                 )
@@ -244,7 +284,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       // Allow the TextField to expand vertically
                       decoration: InputDecoration(
 
-                        hintText: "Type your message",hintStyle: const TextStyle(fontSize: 12),
+                        hintText: "Type your message",hintStyle: TextStyle(fontSize: 12),
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min, // Ensure buttons take minimum space
                           children: [
@@ -253,12 +293,12 @@ class _ChatRoomState extends State<ChatRoom> {
                             //   onPressed: () => getImage(),
                             // ),
                             InkWell(onTap:()=>getImage(),
-                                child: const Icon(Icons.image)),
+                                child: Icon(Icons.image)),
                             SizedBox(width: 2.h,),
                             SvgPicture.asset("assets/Bold-Voice 2.svg"),
                             IconButton(
                               onPressed: onSendMessage,
-                              icon: const Icon(Icons.send),
+                              icon: Icon(Icons.send),
                             ),
                           ],
                         ),
@@ -283,7 +323,7 @@ class _ChatRoomState extends State<ChatRoom> {
     return map["type"] == "text"
         ? Container(
       width: size.width,
-      alignment: map["sendBy"] == _auth.currentUser?.displayName
+      alignment: map["sendBy"] == _auth.currentUser?.uid
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: Container(
@@ -299,7 +339,7 @@ class _ChatRoomState extends State<ChatRoom> {
       height: size.height / 2.5,
       width: size.width,
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      alignment: map["sendBy"] == _auth.currentUser?.displayName
+      alignment: map["sendBy"] == _auth.currentUser?.uid
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: InkWell(

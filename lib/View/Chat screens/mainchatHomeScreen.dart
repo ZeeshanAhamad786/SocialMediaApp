@@ -1,13 +1,14 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth if not imported
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 
+import '../../Controllers/GetuserdataDataController.dart';
 import 'ChatRoomScreen.dart';
 
 class MainChatHomeScreen extends StatefulWidget {
-  const MainChatHomeScreen({Key? key}) : super(key: key);
+  MainChatHomeScreen({Key? key}) : super(key: key);
 
   @override
   State<MainChatHomeScreen> createState() => _MainChatHomeScreenState();
@@ -20,6 +21,9 @@ class _MainChatHomeScreenState extends State<MainChatHomeScreen>  with WidgetsBi
   late Map<String, dynamic> userMap = {};
   bool isloading = false;
   final TextEditingController _search = TextEditingController();
+  GetUserDataController getUserDataController = Get.put(GetUserDataController());
+
+
   @override
   void initState (){
     super.initState();
@@ -55,32 +59,50 @@ class _MainChatHomeScreenState extends State<MainChatHomeScreen>  with WidgetsBi
   }
 
   Future<void> onSearch() async {
-    FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    setState(() {
-      isloading = true;
-    });
-
-    await _firestore
-        .collection("users")
-        .where("email", isEqualTo: _search.text)
-        .get()
-        .then((value) {
+    try {
       setState(() {
-        userMap = value.docs.isNotEmpty
-            ? value.docs[0].data()
-            : {}; // Update userMap or set it to an empty map if there are no results
+        isloading = true;
+      });
+
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
+          .collection("users")
+          .where("email", isEqualTo: _search.text)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          userMap = querySnapshot.docs[0].data() ?? {}; // Check for null
+          isloading = false;
+        });
+
+        // Update status
+        setStatus("Online");
+
+        print("UserMap: $userMap");
+      } else {
+        setState(() {
+          userMap = {}; // No matching user found
+          isloading = false;
+        });
+        print("No user found");
+      }
+    } catch (e) {
+      setState(() {
+        userMap = {}; // Handle the error case
         isloading = false;
       });
-      print(userMap);
-    });
+      print("Error: $e");
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("HELLO"),
+        title: Text("Email Account"),
       ),
       body: isloading
           ? Center(
@@ -116,38 +138,51 @@ class _MainChatHomeScreenState extends State<MainChatHomeScreen>  with WidgetsBi
             ),
           ),
           SizedBox(height: size.height / 20),
-          userMap !=null
+          userMap != null
               ? ListTile(
             onTap: () {
-              String roomId = chatRoomId(
-                  _auth.currentUser!.displayName ?? "N/A",
-                  userMap["name"] ?? "N/A");
+              if (userMap != null &&
+                  userMap["name"] != null &&
+                  userMap["email"] != null) {
+                String roomId = chatRoomId(
+                    getUserDataController.getUserDataRxModel.value!.name,
+                    userMap["name"] ?? "N/A");
 
-              log(userMap["name"].toString() + _auth.currentUser!.displayName.toString());
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
+                log(roomId);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
                     builder: (_) => ChatRoom(
                       chatRoomId: roomId,
                       userMap: userMap,
-                    )),
-              );
+                    ),
+                  ),
+                );
+              } else {
+                // Handle the case where required fields are missing or null
+                print("User data is incomplete");
+              }
             },
-            leading: Icon(Icons.account_box, color: Colors.black),
+
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(userMap["photoUrl"] ?? ""),
+            ),
             title: Text(userMap["name"] ?? "N/A",
-                style: TextStyle(color: Colors.black)),
+                style:  TextStyle(color: Colors.black)),
             subtitle: Text(userMap["email"] ?? "N/A",
                 style: TextStyle(color: Colors.black)),
             trailing: Icon(Icons.chat, color: Colors.black),
           )
-              : Container()
+              : Container(),
+
         ],
       ),
       floatingActionButton:FloatingActionButton(
         child:  Icon(Icons.group),
         onPressed: () {
-          // Navigator.push(context, MaterialPageRoute(builder: (_)=>GroupChatMainChatHomeScreen()));
+
         },
       ) ,
     );
