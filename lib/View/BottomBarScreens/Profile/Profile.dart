@@ -1,14 +1,10 @@
-import 'dart:developer';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import '../../../Controllers/GetuserdataDataController.dart';
 import '../../../Controllers/ProfileController.dart';
-
-import '../../../ViewModels/chatViewModel.dart';
 import '../../../Widgets/CustomButton.dart';
 import '../../../Widgets/PicPost_Widget.dart';
 import '../../../Widgets/PostFeedScreenForProfileScreen.dart';
@@ -18,6 +14,13 @@ import 'All_Tab.dart';
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
 import 'Profile_MoreButton.dart';
+String chatRoomId(String user1, String user2) {
+  if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
+    return "$user1$user2";
+  } else {
+    return "$user2$user1";
+  }
+}
 
 class Profile extends StatefulWidget {
   final bool otherUserProfile;
@@ -28,29 +31,64 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
-  // String currentUserId = ''; // Add this line to get the current user ID
-  // String chatRoomId = '';
-  // Map<String, dynamic> userMap = {};
+class _ProfileState extends State<Profile> with WidgetsBindingObserver {
   final ProfileController controller = Get.put(ProfileController());
-
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  late Map<String, dynamic> userMap = {};
   GetUserDataController getUserDataController = Get.put(GetUserDataController());
-  // FirebaseAuth _auth = FirebaseAuth.instance;
-  //
-  // // Function to generate a chat room ID
-  // String generateChatRoomId(String user1, String user2) {
-  //   if (user1[0].toLowerCase().codeUnits[0] > user2[0].toLowerCase().codeUnits[0]) {
-  //     return "$user1$user2";
-  //   } else {
-  //     return "$user2$user1";
-  //   }
-  // }
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    setStatus("Online");
+  }
+
+  void setStatus(String status) async {
+    await _firestore
+        .collection("users")
+        .doc(_auth.currentUser?.uid)
+        .update({"status": status});
+  }
+
+  void onMessageButtonTap() {
+    String roomId = widget.otherUserProfile
+        ? chatRoomId(
+      getUserDataController.getUserDataRxModel.value!.name,
+      controller.userProfile.value.name ?? "",
+    )
+        : "";
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatRoom(
+          chatRoomId: roomId,
+          userMap: {
+            "name": getUserDataController.getUserDataRxModel.value!.name,
+            "photoUrl":
+            getUserDataController.getUserDataRxModel.value!.profileimage,
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setStatus("Online");
+    } else {
+      setStatus("Offline");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Add this line to get the current user ID
-    // currentUserId = _auth.currentUser?.uid ?? '';
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
@@ -75,7 +113,8 @@ class _ProfileState extends State<Profile> {
               automaticallyImplyLeading: false,
               expandedHeight: 400,
               pinned: true,
-              title: innerBoxIsScrolled && (widget.otherUserProfile || !widget.otherUserProfile)
+              title: innerBoxIsScrolled &&
+                  (widget.otherUserProfile || !widget.otherUserProfile)
                   ? Padding(
                 padding: const EdgeInsets.only(top: 26.0),
                 child: Row(
@@ -130,10 +169,11 @@ class _ProfileState extends State<Profile> {
                               image: DecorationImage(
                                   image: NetworkImage(
                                     getUserDataController
-                                        .getUserDataRxModel.value!.backgroundImage,
+                                        .getUserDataRxModel.value!
+                                        .backgroundImage,
                                   ),
                                   fit: BoxFit.cover),
-                              borderRadius: BorderRadius.only(
+                              borderRadius: const BorderRadius.only(
                                   bottomRight: Radius.circular(25),
                                   bottomLeft: Radius.circular(25))),
                         ),
@@ -149,8 +189,7 @@ class _ProfileState extends State<Profile> {
                                       shape: const RoundedRectangleBorder(
                                         borderRadius: BorderRadius.only(
                                             topRight: Radius.circular(25),
-                                            topLeft: Radius.circular(
-                                                25)), // Set circular border radius here
+                                            topLeft: Radius.circular(25)),
                                       ),
                                       context: context,
                                       builder: (BuildContext context) =>
@@ -196,13 +235,14 @@ class _ProfileState extends State<Profile> {
                                         Text(
                                           getUserDataController
                                               .getUserDataRxModel.value?.name ??
-                                              '', // Use null-aware operators
+                                              '',
                                           style: const TextStyle(
                                             color: Color(0xff3EA7FF),
                                             fontWeight: FontWeight.w500,
                                             fontSize: 15,
                                           ),
                                         ),
+
                                         if (widget.otherUserProfile)
                                           Expanded(
                                             child: Align(
@@ -212,28 +252,7 @@ class _ProfileState extends State<Profile> {
                                                 width: 95,
                                                 child: CustomButton(
                                                   text: 'Message',
-                                                  onPressed: () {
-                                                    // String roomId = generateChatRoomId(
-                                                    //     currentUserId,
-                                                    //     userMap["name"] ??
-                                                    //         "N/A");
-                                                    //
-                                                    // log(userMap["name"]
-                                                    //     .toString() +
-                                                    //     _auth.currentUser!
-                                                    //         .displayName
-                                                    //         .toString());
-
-                                                    // Navigator.push(
-                                                    //   context,
-                                                    //   MaterialPageRoute(
-                                                    //       builder: (_) =>
-                                                    //           ChatRoom(
-                                                    //             chatRoomId: roomId,
-                                                    //             userMap: userMap,
-                                                    //           )),
-                                                    // );
-                                                  },
+                                                  onPressed: onMessageButtonTap,
                                                 ),
                                               ),
                                             ),
@@ -261,7 +280,7 @@ class _ProfileState extends State<Profile> {
                                                 child: CustomButton(
                                                   text: 'Edit Profile',
                                                   onPressed: () {
-                                                    Get.to(ProfileEdit());
+                                                    Get.to(const ProfileEdit());
                                                   },
                                                 ),
                                               ),

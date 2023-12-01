@@ -5,6 +5,7 @@ import '../../Controllers/GetuserdataDataController.dart';
 import '../CreatePost/UploadFeed_Dialog.dart';
 import 'CallHistory.dart';
 import 'ChatRoomScreen.dart';
+import 'mainchatHomeScreen.dart';
 
 
 class MainChatScreens extends StatefulWidget {
@@ -106,12 +107,13 @@ class _MainChatScreensState extends State<MainChatScreens> {
                       Padding(
                         padding: const EdgeInsets.only(left: 6,top: 8),
                         child: Row(
-                          children: [CircleAvatar(
-                            radius: 20,
-                            backgroundImage:NetworkImage( getUserDataController
-                                .getUserDataRxModel.value?.profileimage ??
-                                '',),
-                          ),
+                          children: [
+                          //   CircleAvatar(
+                          //   radius: 20,
+                          //   backgroundImage:NetworkImage( getUserDataController
+                          //       .getUserDataRxModel.value?.profileimage ??
+                          //       '',),
+                          // ),
 
                             Expanded(
                               child: Align(
@@ -250,7 +252,7 @@ class _MainChatScreensState extends State<MainChatScreens> {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return UploadFedd_Dialog();
+                        return MainChatHomeScreen();
                       },
                     );            },
                   child:  Icon(Icons.add, size: 3.5.h),
