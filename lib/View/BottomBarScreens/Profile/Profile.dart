@@ -1,12 +1,14 @@
 
 import 'dart:developer';
-
+import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:get/get.dart';
+
 import '../../../Controllers/CreatePostController.dart';
 import '../../../Controllers/GetuserdataDataController.dart';
 import '../../../Controllers/ProfileController.dart';
@@ -14,14 +16,24 @@ import '../../../Controllers/ProfileController.dart';
 import '../../../Widgets/CustomButton.dart';
 import '../../../Widgets/PicPost_Widget.dart';
 
+import '../../Chat screens/ChatRoomScreen.dart';
 import '../../CreatePost/CommentsScreen.dart';
 import '../Home/PostsFeedScreen.dart';
 import '../Home/SharePost.dart';
-import 'All_Tab.dart';
+
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
 import 'Profile_MoreButton.dart';
+String chatRoomId1 =Uuid().v1();
 
+
+String chatRoomId(String user1, String user2) {
+  if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
+    return "$user1$user2";
+  } else {
+    return "$user2$user1";
+  }
+}
 class Profile extends StatefulWidget {
   final bool otherUserProfile;
 
@@ -37,11 +49,77 @@ class Profile extends StatefulWidget {
   State<Profile> createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ProfileState extends State<Profile>with WidgetsBindingObserver {
   CreatePostController createPostController = Get.put(CreatePostController());
   final ProfileController controller = Get.put(ProfileController());
 
+  bool isFollowing = false;
+  void toggleFollow() {
+    setState(() {
+      isFollowing = !isFollowing;
+
+    });
+    if(isFollowing){
+      controller.unfollowUser(_auth.currentUser!.uid,widget.userId);
+    }else{
+
+      controller.followUser(_auth.currentUser!.uid,widget.userId);
+    }
+
+  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late Map<String, dynamic> userMap = {};
   GetUserDataController getUserDataController = Get.put(GetUserDataController());
+
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    setStatus("Online");
+  }
+
+  void setStatus(String status) async {
+    await _firestore
+        .collection("users")
+        .doc(widget.userId)
+        .update({"status": status});
+  }
+
+
+  void onMessageButtonTap() {
+    String roomId = widget.otherUserProfile
+        ? chatRoomId(
+      getUserDataController.getUserDataRxModel.value!.name,
+      widget.profileName ?? "",
+    )
+        : Uuid().v1(); // Generate a UUID if otherUserProfile is false
+
+    Get.to(() => ChatRoom(
+      chatRoomId: roomId,
+      userMap: {
+        "name": widget.profileName,
+        "photoUrl": widget.profileImage,
+      },
+      userId: widget.userId, profileName: widget.profileName,profilrImage: widget.profileImage,
+    ));
+  }
+
+
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setStatus("Online");
+    } else {
+      setStatus("Offline");
+    }
+  }
+
   var ispersonalpost;
 
   List<String> media = [];
@@ -59,7 +137,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     addPosts();
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
         length: 3,
@@ -100,7 +178,11 @@ class _ProfileState extends State<Profile> {
                               height: 25,
                               width: 80,
                               child: CustomButton(
-                                  text: 'Follow', onPressed: () {}))
+                                  text: 'Follow', onPressed: () {
+
+
+
+                              }))
                               : IconButton(
                             icon: const Icon(Icons.more_vert),
                             onPressed: () {},
@@ -137,9 +219,10 @@ class _ProfileState extends State<Profile> {
                           decoration: BoxDecoration(
                               image: DecorationImage(
                                   image: NetworkImage(
-                                 widget.userId==   getUserDataController
-                                        .getUserDataRxModel.value!.userId?getUserDataController.getUserDataRxModel.value!.backgroundImage:
-                                     ""
+                                      widget.userId==   getUserDataController
+                                          .getUserDataRxModel.value!.userId?
+                                      getUserDataController.getUserDataRxModel.value!.backgroundImage:
+                                      ""
                                   ),
                                   fit: BoxFit.cover),
                               borderRadius: const BorderRadius.only(
@@ -186,7 +269,7 @@ class _ProfileState extends State<Profile> {
                                     alignment: Alignment.centerLeft,
                                     child: ProfilePicWidget(
                                       picType: 'network',
-                                    widget.profileImage,
+                                      widget.profileImage,
                                       95,
                                       95,
                                     ),
@@ -201,7 +284,7 @@ class _ProfileState extends State<Profile> {
                                     child: Row(
                                       children: [
                                         Text(
-                    widget.profileName, // Use null-aware operators
+                                          widget.profileName, // Use null-aware operators
                                           style: const TextStyle(
                                             color: Color(0xff3EA7FF),
                                             fontWeight: FontWeight.w500,
@@ -217,28 +300,7 @@ class _ProfileState extends State<Profile> {
                                                 width: 95,
                                                 child: CustomButton(
                                                   text: 'Message',
-                                                  onPressed: () {
-                                                    // String roomId = generateChatRoomId(
-                                                    //     currentUserId,
-                                                    //     userMap["name"] ??
-                                                    //         "N/A");
-                                                    //
-                                                    // log(userMap["name"]
-                                                    //     .toString() +
-                                                    //     _auth.currentUser!
-                                                    //         .displayName
-                                                    //         .toString());
-
-                                                    // Navigator.push(
-                                                    //   context,
-                                                    //   MaterialPageRoute(
-                                                    //       builder: (_) =>
-                                                    //           ChatRoom(
-                                                    //             chatRoomId: roomId,
-                                                    //             userMap: userMap,
-                                                    //           )),
-                                                    // );
-                                                  },
+                                                  onPressed: onMessageButtonTap,
                                                 ),
                                               ),
                                             ),
@@ -250,9 +312,24 @@ class _ProfileState extends State<Profile> {
                                             child: SizedBox(
                                               height: 30,
                                               width: 80,
-                                              child: CustomButton(
-                                                text: 'Follow',
-                                                onPressed: () {},
+                                              child: ElevatedButton(
+
+                                                onPressed:  toggleFollow,
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: isFollowing?  Color(0xffAC83F6):Colors.white,
+                                                  elevation: 0,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(10),  side: isFollowing?const BorderSide(color: Color(0xffAC83F6)):BorderSide(color: Color(0xffAC83F6))
+
+                                                  ),
+                                                ),
+                                                child:isFollowing? const Text(
+                                                  "Follow",
+                                                  style: TextStyle(color:Colors.white,fontSize: 13),
+                                                ): const Text(
+                                                  "UnFollow",
+                                                  style: TextStyle(color:Colors.black,fontSize: 11),
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -280,19 +357,19 @@ class _ProfileState extends State<Profile> {
                                 Padding(
                                   padding: const EdgeInsets.only(left: 25.0),
                                   child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: getUserDataController
-                                        .getUserDataRxModel.value!.userId==widget.userId?
-                                    Text(
-                                      getUserDataController
-                                          .getUserDataRxModel.value!.bio,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                        fontSize: 13,
-                                      ),
-                                      textAlign: TextAlign.start,
-                                    ):Text('data')
+                                      alignment: Alignment.centerLeft,
+                                      child: getUserDataController
+                                          .getUserDataRxModel.value!.userId==widget.userId?
+                                      Text(
+                                        getUserDataController
+                                            .getUserDataRxModel.value!.bio,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                          fontSize: 13,
+                                        ),
+                                        textAlign: TextAlign.start,
+                                      ):Text('data')
                                   ),
                                 ),
                               ],
@@ -313,16 +390,72 @@ class _ProfileState extends State<Profile> {
 
                                 ),
                                 Expanded(
-                                  child: Accountdata_Widget(
-                                    "Followers",
-                                    userProfile.numberOfFollowers,
-                                  ),
+                                  child:FutureBuilder<List<String>>(
+                                    future: controller.getFollowers(widget.userId),
+                                    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                                      switch (snapshot.connectionState) {
+                                        case ConnectionState.none:
+                                          return Text('Press button to start.');
+                                        case ConnectionState.active:
+                                        case ConnectionState.waiting:
+                                          return Text('Awaiting result...');
+                                        case ConnectionState.done:
+                                          if (snapshot.hasError) {
+                                            return Text('Error: ${snapshot.error}');
+                                          } else {
+                                            // Use the snapshot.data to get the list of followers
+                                            List<String> followers = snapshot.data ?? [];
+
+                                            return Column(
+                                              children: [
+                                                Text(
+                                                  ' ${followers.length}', // Display the count of followers
+                                                  style:  const TextStyle(color:Colors.black,fontSize: 17),textAlign: TextAlign.center,
+                                                ),const Text(
+                                                  'Followers', // Display the count of followers
+                                                  style: TextStyle(color:Colors.grey,fontSize: 12 ),textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            );
+                                          }
+                                      }
+                                    },
+                                  )
+
                                 ),
                                 Expanded(
-                                  child: Accountdata_Widget(
-                                    "Following",
-                                    userProfile.numberOfFollowings,
-                                  ),
+                                  child:FutureBuilder<List<String>>(
+                                    future: controller.getFollowing(widget.userId),
+                                    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                                      switch (snapshot.connectionState) {
+                                        case ConnectionState.none:
+                                          return Text('Press button to start.');
+                                        case ConnectionState.active:
+                                        case ConnectionState.waiting:
+                                          return Text('Awaiting result...');
+                                        case ConnectionState.done:
+                                          if (snapshot.hasError) {
+                                            return Text('Error: ${snapshot.error}');
+                                          } else {
+                                            // Use the snapshot.data to get the list of followers
+                                            List<String> followers = snapshot.data ?? [];
+
+                                            return Column(
+                                              children: [
+                                                Text(
+                                                  ' ${followers.length}', // Display the count of followers
+                                                  style:  const TextStyle(color:Colors.black,fontSize: 17),textAlign: TextAlign.center,
+                                                ),const Text(
+                                                  'Followers', // Display the count of followers
+                                                  style: TextStyle(color:Colors.grey,fontSize: 12 ),textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            );
+                                          }
+                                      }
+                                    },
+                                  )
+
                                 ),
                               ],
                             ),
@@ -559,28 +692,28 @@ class _ProfileState extends State<Profile> {
                     }
                   },
                 ),
-              GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 5.0,
-                  mainAxisSpacing: 8.0,
-                ),
-                scrollDirection: Axis.vertical,
-                itemCount: media.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      image: DecorationImage(
-                        image: NetworkImage(media[index]),
-                        fit: BoxFit.cover,
+                GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 5.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  scrollDirection: Axis.vertical,
+                  itemCount: media.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return  Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        image: DecorationImage(
+                          image: NetworkImage(media[index]),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                  ); // or any other placeholder widget
-                },
-              ),
+                    ); // or any other placeholder widget
+                  },
+                ),
                 PostFeedScreen(
                   saved_posts_Screen: false,
                   ispersonalpost: !widget.otherUserProfile,
@@ -590,6 +723,6 @@ class _ProfileState extends State<Profile> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

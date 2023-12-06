@@ -10,6 +10,8 @@ class ProfileModel {
   final String numberOfFollowers;
   final String numberOfFollowings;
   final List<String> posts;
+  final List <String> activeChatUsers;
+  final String followers;
 
   ProfileModel({
     required this.profileimage,
@@ -22,6 +24,8 @@ class ProfileModel {
     required this.numberOfFollowers,
     required this.numberOfFollowings,
     required this.posts,
+    required this.activeChatUsers,
+    required this.followers,
     required this.backgroundImage
   });
 
@@ -38,6 +42,8 @@ class ProfileModel {
       numberOfFollowers: json['numberOfFollowers'] ?? '',
       numberOfFollowings: json['numberOfFollowings'] ?? '',
       posts: List<String>.from(json['posts'] ?? []),
+      activeChatUsers: List<String>.from(json['activeChatUsers'] ?? []),
+      followers: json['followers'] ?? '',
       backgroundImage: json['backgroundImage'] ?? '',
 
     );
@@ -54,10 +60,13 @@ class ProfileModel {
       'numberOfFollowers': numberOfFollowers,
       'numberOfFollowings': numberOfFollowings,
       'posts': posts,
+      'activeChatUsers': activeChatUsers,
+      'followers': followers,
       if (backgroundImage.isNotEmpty) 'backgroundImage': backgroundImage,
       if (location.isNotEmpty) 'userLocation': location,
       if (bio.isNotEmpty) 'userBio': bio,
       // Add other fields
     };
   }
+
 }

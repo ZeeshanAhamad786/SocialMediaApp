@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +13,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-import '../Utis/firebase.dart';
+import '../View/BottomBarScreens/Profile/Profile.dart';
 import 'GetuserdataDataController.dart';
 
 class ProfileEditController extends GetxController {
@@ -19,15 +21,14 @@ class ProfileEditController extends GetxController {
   TextEditingController dOBController = TextEditingController();
   TextEditingController locationController = TextEditingController();
   TextEditingController bioController = TextEditingController();
+  RxBool isLoading = RxBool(false);
   GetUserDataController getUserDataController =
   Get.put(GetUserDataController());
+
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
-  String? profileImageUrl;
-  String? backgroundImage;
 
-  Rx<File?> selectedCoverImage = Rx<File?>(null);
-  Rx<File?> selectedProfileImage = Rx<File?>(null);
+  RxBool isUploading = false.obs;
 
   Future<void> updateProfileHandler({
     userName,
@@ -40,30 +41,14 @@ class ProfileEditController extends GetxController {
         locationController.text.isNotEmpty &&
         bioController.text.isNotEmpty) {
       try {
-        if (selectedProfileImage.value != null && selectedCoverImage.value != null) {
-          await updateProfileAndBackgroundImages(
-            userName: userName,
-            userDOB: userDOB,
-            userLocation: userLocation,
-            userBio: userBio,
-          );
-        } else if (selectedProfileImage.value != null) {
-          await updateProfileImage(
-            userName: userName,
-            userDOB: userDOB,
-            userLocation: userLocation,
-            userBio: userBio,
-          );
-        } else if (selectedCoverImage.value != null) {
-          await updateBackgroundImage(
-            userName: userName,
-            userDOB: userDOB,
-            userLocation: userLocation,
-            userBio: userBio,
-          );
-        } else {
-          Get.snackbar('Error', 'Please select an image to update.');
-        }
+        await uploadProfileImageToFirebaseStorage(
+          profileImage: selectedProfileImage.value,
+          coverImage: selectedCoverImage.value,
+          userName: userName,
+          userDOB: userDOB,
+          userLocation: userLocation,
+          userBio: userBio,
+        );
       } on FirebaseAuthException catch (e) {
         Get.snackbar('Error', e.toString());
       }
@@ -72,150 +57,132 @@ class ProfileEditController extends GetxController {
     }
   }
 
-  Future<void> updateProfileAndBackgroundImages({
-    userName,
-    userDOB,
-    userLocation,
-    userBio,
-  }) async {
-    await uploadProfileImageToFirebaseStorage(
-      selectedProfileImage.value!,
-      userName: userName,
-      userDOB: userDOB,
-      userLocation: userLocation,
-      userBio: userBio,
-    );
-
-    await uploadBackgroundImageToFirebaseStorage(
-      selectedCoverImage.value!,
-      userName: userName,
-      userDOB: userDOB,
-      userLocation: userLocation,
-      userBio: userBio,
-    );
-  }
-
-  Future<void> updateProfileImage({
-    userName,
-    userDOB,
-    userLocation,
-    userBio,
-  }) async {
-    await uploadProfileImageToFirebaseStorage(
-      selectedProfileImage.value!,
-      userName: userName,
-      userDOB: userDOB,
-      userLocation: userLocation,
-      userBio: userBio,
-    );
-  }
-
-  Future<void> updateBackgroundImage({
-    userName,
-    userDOB,
-    userLocation,
-    userBio,
-  }) async {
-    await uploadBackgroundImageToFirebaseStorage(
-      selectedCoverImage.value!,
-      userName: userName,
-      userDOB: userDOB,
-      userLocation: userLocation,
-      userBio: userBio,
-    );
-  }
-
   Future<void> updateUserData({
     profileImage,
-    backgroundImage,
+    backgroundImage, // Corrected parameter name
     userName,
     userDOB,
     userBio,
     userLocation,
   }) async {
     final dataToUpdate = {
-      if (profileImage != null) 'photoUrl': profileImage,
-      if (backgroundImage != null) 'backgroundImage': backgroundImage,
+      'photoUrl': profileImage,
+      'backgroundImage': backgroundImage, // Corrected parameter name
       'name': userName,
       "userBio": userBio,
       "userLocation": userLocation,
       'dob': userDOB,
     };
-
-    await firestore
+    return await FirebaseFirestore.instance
         .collection('users')
         .doc(auth.currentUser!.uid)
         .update(dataToUpdate)
-        .then((value) {
-      getUserDataController.getUserData();
-      Get.snackbar('Success', 'User Update Successfully.');
-
-      print("User Updated");
-    }).catchError((error) {
-      print("Failed to add user: $error");
+        .then(
+          (value) {
+        getUserDataController.getUserData();
+        Get.snackbar('Success', 'User Update Successfully.');
+        log("User Updated");
+      },
+    ).catchError((error) {
+      log("Failed to add user: $error");
     });
   }
 
-  Future<void> uploadProfileImageToFirebaseStorage(
-      File profileImage, {
-        userName,
-        userDOB,
-        userBio,
-        userLocation,
-      }) async {
+  Future<void> uploadProfileImageToFirebaseStorage({
+    profileImage,
+    coverImage,
+    userName,
+    userDOB,
+    userBio,
+    userLocation,
+  }) async {
     try {
-      final fileProfileName = '${auth.currentUser!.uid}_image.jpg';
-      final Reference storageProfileRef =
-      storage.ref().child('profile_images_folder/$fileProfileName');
-      await storageProfileRef.putFile(profileImage);
+      final storage = FirebaseStorage.instance;
+      String? profileImageUrl;
+      String? backgroundImage;
 
-      profileImageUrl = await storageProfileRef.getDownloadURL();
-      print('Download URL for $fileProfileName: $profileImageUrl');
+      if (profileImage != null && coverImage == null) {
+        final fileProfileName = '${auth.currentUser!.uid}_image.jpg';
+        final Reference storageProfileRef =
+        storage.ref().child('profile_images_folder/$fileProfileName');
+        await storageProfileRef.putFile(profileImage);
 
-      await updateUserData(
-        profileImage: profileImageUrl,
-        userName: userName,
-        userBio: userBio,
-        userLocation: userLocation,
-        userDOB: userDOB,
-        backgroundImage: null,
-      );
+        profileImageUrl = await storageProfileRef.getDownloadURL();
+        log('Download URL for $fileProfileName: $profileImageUrl');
+
+        await updateUserData(
+          profileImage: profileImageUrl,
+          userName: userName,
+          userBio: userBio,
+          userLocation: userLocation,
+          userDOB: userDOB,
+          backgroundImage:
+          getUserDataController.getUserDataRxModel.value!.backgroundImage,
+        );
+      } else if (profileImage == null && coverImage != null) {
+        final fileCoverName = '${auth.currentUser!.uid}_background_image.jpg';
+        final Reference storageCoverRef =
+        storage.ref().child('background_images_folder/$fileCoverName');
+        await storageCoverRef.putFile(coverImage);
+
+        backgroundImage = await storageCoverRef.getDownloadURL();
+        log('Download URL for $fileCoverName: $backgroundImage');
+
+        await updateUserData(
+          profileImage:
+          getUserDataController.getUserDataRxModel.value!.profileimage,
+          userName: userName,
+          userBio: userBio,
+          userLocation: userLocation,
+          userDOB: userDOB,
+          backgroundImage: backgroundImage,
+        );
+      } else if (selectedProfileImage.value != null &&
+          selectedCoverImage.value != null) {
+        final fileProfileName = '${auth.currentUser!.uid}_image.jpg';
+        final Reference storageProfileRef =
+        storage.ref().child('profile_images_folder/$fileProfileName');
+        await storageProfileRef.putFile(profileImage);
+
+        profileImageUrl = await storageProfileRef.getDownloadURL();
+        log('Download URL for $fileProfileName: $profileImageUrl');
+
+        final fileCoverName = '${auth.currentUser!.uid}_background_image.jpg';
+        final Reference storageCoverRef =
+        storage.ref().child('background_images_folder/$fileCoverName');
+        await storageCoverRef.putFile(coverImage);
+
+        backgroundImage = await storageCoverRef.getDownloadURL();
+        log('Download URL for $fileCoverName: $backgroundImage');
+
+        await updateUserData(
+          profileImage: profileImageUrl,
+          userName: userName,
+          userBio: userBio,
+          userLocation: userLocation,
+          userDOB: userDOB,
+          backgroundImage: backgroundImage,
+        );
+      } else if (selectedProfileImage.value == null &&
+          selectedCoverImage.value == null) {
+        await updateUserData(
+          profileImage:
+          getUserDataController.getUserDataRxModel.value!.profileimage,
+          userName: userName,
+          userBio: userBio,
+          userLocation: userLocation,
+          userDOB: userDOB,
+          backgroundImage:
+          getUserDataController.getUserDataRxModel.value!.backgroundImage,
+        );
+      }
     } catch (e) {
-      print('Error uploading profile image to Firebase Storage: $e');
+      log('Error uploading images to Firebase Storage: $e');
     }
   }
 
-  Future<void> uploadBackgroundImageToFirebaseStorage(
-      File backgroundImage, {
-        profileImage,
-        userName,
-        userDOB,
-        userBio,
-        userLocation,
-      }) async {
-    try {
-      final fileName = '${auth.currentUser!.uid}_background_image.jpg';
-      final Reference storageRef =
-      storage.ref().child('background_images_folder/$fileName');
-      await storageRef.putFile(backgroundImage);
-
-      backgroundImage = (await storageRef.getDownloadURL()) as File;
-      print('Download URL for $fileName: $backgroundImage');
-
-      await updateUserData(
-        profileImage: null,
-        userName: userName,
-        userBio: userBio,
-        userLocation: userLocation,
-        userDOB: userDOB,
-        backgroundImage: backgroundImage,
-      );
-    } catch (e) {
-      print('Error uploading background image to Firebase Storage: $e');
-    }
-  }
-
-
+  var selectedCoverImage = Rx<File?>(null);
+  var selectedProfileImage = Rx<File?>(null);
 
   selectDOB(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -261,4 +228,6 @@ class ProfileEditController extends GetxController {
       Get.snackbar("An Error", " ${e.toString()}");
     }
   }
+
+
 }

@@ -34,7 +34,7 @@ class commentModel1 {
       commentId: map['commentId'] ?? '',
       userId: map['userId'] ?? '',
       comment: map['comment'] ?? '',
-      timestamp: map['timestamp'] != null ? map['timestamp'] : 0,
+      timestamp: map['timestamp'] ?? 0,
       userProfileImage: map['userProfileImage'] ?? '',
       userName: map['userName'] ?? '',
       postId: map['postId'] ?? '',

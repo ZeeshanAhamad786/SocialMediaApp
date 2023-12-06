@@ -11,32 +11,32 @@ class ProfileEdit extends StatefulWidget {
   State<ProfileEdit> createState() => _ProfileEditState();
 }
 class _ProfileEditState extends State<ProfileEdit> {
-final ProfileEditController profileEditController =Get.put(ProfileEditController(),tag: "profileEditController");
+  final ProfileEditController profileEditController =Get.put(ProfileEditController(),tag: "profileEditController");
   GetUserDataController getUserDataController = Get.put(GetUserDataController());
-@override
-void initState() {
-  super.initState();
-  // Set the initial values from profileEditController
-  if (profileEditController.nameController.text.isEmpty) {
-    profileEditController.nameController.text =
-        profileEditController.getUserDataController.getUserDataRxModel.value!.name;
+  @override
+  void initState() {
+    super.initState();
+    // Set the initial values from profileEditController
+    if (profileEditController.nameController.text.isEmpty) {
+      profileEditController.nameController.text =
+          profileEditController.getUserDataController.getUserDataRxModel.value!.name;
+    }
+    if (profileEditController.dOBController.text.isEmpty) {
+      profileEditController.dOBController.text =
+          profileEditController.getUserDataController.getUserDataRxModel.value!.dob;
+    }
+    if (profileEditController.bioController.text.isEmpty) {
+      profileEditController.bioController.text =
+          profileEditController.getUserDataController.getUserDataRxModel.value!.bio.toString();
+    }
+    if (profileEditController.locationController.text.isEmpty) {
+      profileEditController.locationController.text =
+          profileEditController. getUserDataController.getUserDataRxModel.value!.location.toString();
+    }
   }
-  if (profileEditController.dOBController.text.isEmpty) {
-    profileEditController.dOBController.text =
-        profileEditController.getUserDataController.getUserDataRxModel.value!.dob;
-  }
-  if (profileEditController.bioController.text.isEmpty) {
-    profileEditController.bioController.text =
-        profileEditController.getUserDataController.getUserDataRxModel.value!.bio.toString();
-  }
-  if (profileEditController.locationController.text.isEmpty) {
-    profileEditController.locationController.text =
-        profileEditController. getUserDataController.getUserDataRxModel.value!.location.toString();
-  }
-}
   @override
   Widget build(BuildContext context) {
-  return Obx(() =>  Scaffold(
+    return Obx(() =>  Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
@@ -114,77 +114,77 @@ void initState() {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.16,
-                    left: 20,
-                  ),
-                  child:Container(
-                    height: 95,
-                    width: 95,
-                    decoration: const BoxDecoration(shape: BoxShape.circle),
-                    child: Stack(
-                      children: [
-                        profileEditController.selectedProfileImage?.value != null ? Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: const Color(0xffAC83F6)),
-                              image: DecorationImage( image:
-                              FileImage(profileEditController.selectedProfileImage?.value ?? File('path/to/default/image'),),fit: BoxFit.cover
-                                  )
+                    padding: EdgeInsets.only(
+                      top: MediaQuery
+                          .of(context)
+                          .size
+                          .height * 0.16,
+                      left: 20,
+                    ),
+                    child:Container(
+                      height: 95,
+                      width: 95,
+                      decoration: const BoxDecoration(shape: BoxShape.circle),
+                      child: Stack(
+                        children: [
+                          profileEditController.selectedProfileImage?.value != null ? Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: const Color(0xffAC83F6)),
+                                image: DecorationImage( image:
+                                FileImage(profileEditController.selectedProfileImage?.value ?? File('path/to/default/image'),),fit: BoxFit.cover
+                                )
+                            ),
+                            // child: Icon(
+                            //   Icons.camera_alt,
+                            //   size: 40,
+                            //   color: const Color(0xffAC83F6),
+                            // ),
+                          ): Container(
+                              height: 100,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: const Color(0xffAC83F6)),
+                                image: DecorationImage( image: NetworkImage(getUserDataController.getUserDataRxModel.value!.profileimage,), fit: BoxFit.cover),
+                              )
                           ),
                           // child: Icon(
                           //   Icons.camera_alt,
                           //   size: 40,
                           //   color: const Color(0xffAC83F6),
                           // ),
-                        ): Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: const Color(0xffAC83F6)),
-                        image: DecorationImage( image: NetworkImage(getUserDataController.getUserDataRxModel.value!.profileimage,), fit: BoxFit.cover),
-                        )
-                    ),
-                    // child: Icon(
-                    //   Icons.camera_alt,
-                    //   size: 40,
-                    //   color: const Color(0xffAC83F6),
-                    // ),
 
-                        InkWell(onTap: () {
-                          profileEditController.profilePickedImage();
-                        },
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              height: 25,
-                              width: 25,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: const Color(0xffAC83F6)),
-                              ),
-                              child: Center(
-                                child: InkWell(onTap: () {
-                                  profileEditController.profilePickedImage();
-                                },
-                                    child: SvgPicture.asset("assets/Edit.svg")),
+                          InkWell(onTap: () {
+                            profileEditController.profilePickedImage();
+                          },
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                height: 25,
+                                width: 25,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: const Color(0xffAC83F6)),
+                                ),
+                                child: Center(
+                                  child: InkWell(onTap: () {
+                                    profileEditController.profilePickedImage();
+                                  },
+                                      child: SvgPicture.asset("assets/Edit.svg")),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
+                        ],
+                      ),
+                    )
                 ),
               ],
             ),
@@ -382,22 +382,37 @@ void initState() {
                     height: Get.height * 0.05,
                   ),
                   TextButton(
-                    onPressed: () {
-                      profileEditController.updateProfileHandler(
-                        userName: profileEditController.nameController.text,
-                        userBio: profileEditController.bioController.text,
-                        userDOB: profileEditController.dOBController.text,
-                        userLocation: profileEditController.locationController.text,
-                      );
+                    onPressed: () async {
 
+                      try {
+                        // Set isLoading to true when the update starts
+                        profileEditController.isLoading.value = true;
+
+                        // Call the updateProfileHandler
+                        await profileEditController.updateProfileHandler(
+                          userName:
+                          profileEditController.nameController.text,
+                          userBio: profileEditController.bioController.text,
+                          userDOB:
+                          profileEditController.dOBController.text,
+                          userLocation:
+                          profileEditController.locationController.text,
+                        );
+
+                        // Set isLoading to false when the update is successful
+                        profileEditController.isLoading.value = false;
+                      } catch (e) {
+                        // Handle any errors during the update
+                        print('Error updating profile: $e');
+
+                        // Set isLoading to false to stop the loading indicator
+                        profileEditController.isLoading.value = false;
+                      }
                     },
                     child: Container(
                       height: 50,
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.6,
-                      decoration: const BoxDecoration(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey,
@@ -407,11 +422,25 @@ void initState() {
                         color: Color(0xffAC83F6),
                         borderRadius: BorderRadius.all(Radius.circular(15)),
                       ),
-                      child: const Center(
-                        child: Text(
-                          "Save",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
+                      child: Center(
+                        child: Obx(() {
+                          // Conditionally show the loading indicator
+                          if (profileEditController.isLoading.value) {
+                            return CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            );
+                          } else {
+                            return Text(
+                              "Save",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            );
+                          }
+                        }),
                       ),
                     ),
                   ),
@@ -457,5 +486,3 @@ void initState() {
     ));
   }
 }
-
-

@@ -136,15 +136,15 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Profile(userId: post.userId,postId: post.postId,
-                                otherUserProfile: !widget.ispersonalpost,profileImage: post.userProfileImage,
+                          post.userId==FirebaseAuth.instance.currentUser!.uid?null:Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                          builder: (context) => Profile(userId: post.userId,postId: post.postId,
+                          otherUserProfile: !widget.ispersonalpost,profileImage: post.userProfileImage,
 
-                              profileName: post.username,
-                              ), // Replace SecondScreen with the screen you want to navigate to.
-                            ),
+                          profileName: post.username,
+                          ), // Replace SecondScreen with the screen you want to navigate to.
+                          ),
                           );
                         },
                         child: ProfilePicWidget(
