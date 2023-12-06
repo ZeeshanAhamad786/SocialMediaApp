@@ -14,6 +14,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:socialmediaapp/View/Chat%20screens/CallHistory.dart';
 import 'package:uuid/uuid.dart';
 
+
 import '../../Controllers/GetuserdataDataController.dart';
 
 
@@ -25,17 +26,19 @@ class ChatRoom extends StatefulWidget {
   final String profilrImage;
 
   ChatRoom(
-      {required this.chatRoomId,
+      {super.key, required this.chatRoomId,
       required this.userMap,
       required this.userId,
       required this.profileName,
       required this.profilrImage});
+
 
   @override
   State<ChatRoom> createState() => _ChatRoomState();
 }
 
 class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
+
   GetUserDataController getUserDataController =
       Get.put(GetUserDataController());
   final TextEditingController _message = TextEditingController();
@@ -50,10 +53,10 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     setStatus("Online");
   }
-
   void setStatus(String status) async {
     await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       "status": status,
+
     });
     setState(() {
       _status = status;
@@ -63,25 +66,22 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-//online
+      //online
       setStatus("Online");
     } else {
       //offline
       setStatus("Offine");
     }
   }
-
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
-
   void onSendMessage() async {
     String messageText = _message.text;
     if (messageText.isNotEmpty) {
       String currentUserID = _auth.currentUser!.uid;
-      String receiverId = widget.userId;
 
       Map<String, dynamic> messageData = {
         "sendBy": currentUserID,
@@ -97,17 +97,46 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
           .doc(widget.chatRoomId)
           .collection("chats")
           .add(messageData);
+      _message.clear();
+      // Get a unique set of user IDs from the users in the chat room
+      Set<String> uniqueUserIds = {currentUserID, widget.userId};
 
-      // Update the activeChatUser list in Firestore
-      await updateActiveChatListInFirestore(receiverId);
-      updateOtherActiveChatListInFirestore(receiverId);
-      await fetchActiveChatUserList();
+      // Convert the set to a list
+      List<String> allUserIds = uniqueUserIds.toList();
+
+      // Iterate through each user in the chat room
+      for (String userId in allUserIds) {
+        // Fetch existing chat rooms for the user
+        DocumentSnapshot userSnapshot =
+        await _firestore.collection("users").doc(userId).get();
+
+        if (userSnapshot.exists) {
+          // Get current list of chat rooms or create an empty list
+          List<String> userChatRooms =
+          List<String>.from(userSnapshot["chatRooms"] ?? []);
+
+          // Add the new chat room ID
+          userChatRooms.add(widget.chatRoomId);
+
+          // Update the user document with the new list of chat rooms
+          await _firestore.collection("users").doc(userId).update({
+            "chatRooms": userChatRooms,
+          });
+        } else {
+          // Handle the case where the document doesn't exist
+          log("User document does not exist for ID: $userId");
+        }
+      }
+
+      // Log the list of users
+      log("All users in the chat room: $allUserIds");
 
       _message.clear();
     } else {
       log("Enter some text");
     }
   }
+
 
   Future<void> updateActiveChatListInFirestore(String activeChatUser) async {
     try {

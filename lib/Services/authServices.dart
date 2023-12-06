@@ -69,7 +69,6 @@ class AuthService {
       'userName':userName,
       'userId':FirebaseAuth.instance.currentUser!.uid,
       "password":password,
-
     });
   }
 

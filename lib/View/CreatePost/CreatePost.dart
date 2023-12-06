@@ -6,16 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:socialmediaapp/Controllers/CreatePostController.dart';
-
-import '../../Controllers/ActiveChatDataController.dart';
 import '../../Controllers/GetuserdataDataController.dart';
-import '../../Models/CreatePostModel.dart';
 import '../../Utis/firebase.dart';
 import '../../Widgets/CustomButton.dart';
 import 'CreatePost_CustomButton.dart';
 
 class CreatePost extends StatefulWidget {
-  CreatePost({Key? key}) : super(key: key);
+  final String? imagePath;
+  const CreatePost({Key? key, this.imagePath}) : super(key: key);
 
   @override
   State<CreatePost> createState() => _CreatePostState();
@@ -45,7 +43,7 @@ class _CreatePostState extends State<CreatePost> {
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 60,
                 ),
                 Row(
@@ -58,9 +56,9 @@ class _CreatePostState extends State<CreatePost> {
                             .postDescriptionController.clear();
                         createPostController.selectedPostImage.value = null;
                       },
-                      icon: Icon(CupertinoIcons.left_chevron),
+                      icon: const Icon(CupertinoIcons.left_chevron),
                     ),
-                    Text(
+                    const Text(
                       'Create Post',
                       style: TextStyle(
                         color: Colors.black,
@@ -68,18 +66,18 @@ class _CreatePostState extends State<CreatePost> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 40,
                       width: 40,
                     )
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 30,
                 ),
                 Row(
                   children: [
-                    Container(
+                    SizedBox(
                       width: 50.0,
                       height: 50.0,
                       child: ClipOval(
@@ -92,7 +90,7 @@ class _CreatePostState extends State<CreatePost> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Column(
@@ -101,7 +99,7 @@ class _CreatePostState extends State<CreatePost> {
                         Text(
                           getUserDataController
                               .getUserDataRxModel.value!.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
@@ -135,12 +133,12 @@ class _CreatePostState extends State<CreatePost> {
                     )
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 Row(
                   children: [
-                    Column(
+                    const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -168,7 +166,7 @@ class _CreatePostState extends State<CreatePost> {
                     )
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 SizedBox(
@@ -176,7 +174,7 @@ class _CreatePostState extends State<CreatePost> {
                   width: Get.width * 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Color(0xffAC83F6),
+                      color: const Color(0xffAC83F6),
                       borderRadius: BorderRadius.circular(10),
                       image: createPostController.selectedPostImage.value !=
                           null
@@ -193,7 +191,7 @@ class _CreatePostState extends State<CreatePost> {
                     margin: const EdgeInsets.all(8.0),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Padding(
@@ -221,7 +219,7 @@ class _CreatePostState extends State<CreatePost> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15,
                 ),
                 Padding(
@@ -230,15 +228,15 @@ class _CreatePostState extends State<CreatePost> {
                     alignment: Alignment.center,
                     child: ElevatedButton(
                       onPressed: isLoading.value ? null : onPressed,
-                      style: ElevatedButton.styleFrom(fixedSize: Size(240, 40),
-                        primary: Color(0xffAC83F6),
+                      style: ElevatedButton.styleFrom(fixedSize: const Size(240, 40),
+                        primary: const Color(0xffAC83F6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       child: isLoading.value
-                          ? CircularProgressIndicator()
-                          : Text(
+                          ? const CircularProgressIndicator()
+                          : const Text(
                         "upload",
                         style: TextStyle(
                           fontSize: 14,
@@ -248,7 +246,7 @@ class _CreatePostState extends State<CreatePost> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Padding(
@@ -264,7 +262,7 @@ class _CreatePostState extends State<CreatePost> {
                     },
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 )
               ],
@@ -294,6 +292,7 @@ class _CreatePostState extends State<CreatePost> {
         timestamp: DateTime.now().toUtc().toIso8601String(),
       );
       isLoading.value = false;
+
     } else {
       Get.snackbar('Error', 'Selected post image is null.');
       isLoading.value = false;

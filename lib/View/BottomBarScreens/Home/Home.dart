@@ -23,10 +23,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
   GetUserDataController getUserDataController =
       Get.put(GetUserDataController());
   final ProfileController controller = Get.put(ProfileController());
-  int _currentIndex = 1;
+  int _currentIndex = 0;
   bool isDrawerOpen = false;
 
   final List<Widget> _screens = [

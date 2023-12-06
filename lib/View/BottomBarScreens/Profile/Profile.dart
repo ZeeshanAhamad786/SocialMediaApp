@@ -24,7 +24,7 @@ import '../Home/SharePost.dart';
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
 import 'Profile_MoreButton.dart';
-String chatRoomId1 =Uuid().v1();
+String chatRoomId1 =const Uuid().v1();
 
 
 String chatRoomId(String user1, String user2) {
@@ -96,7 +96,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
       getUserDataController.getUserDataRxModel.value!.name,
       widget.profileName ?? "",
     )
-        : Uuid().v1(); // Generate a UUID if otherUserProfile is false
+        : const Uuid().v1(); // Generate a UUID if otherUserProfile is false
 
     Get.to(() => ChatRoom(
       chatRoomId: roomId,
@@ -316,10 +316,10 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
 
                                                 onPressed:  toggleFollow,
                                                 style: ElevatedButton.styleFrom(
-                                                  primary: isFollowing?  Color(0xffAC83F6):Colors.white,
+                                                  primary: isFollowing?  const Color(0xffAC83F6):Colors.white,
                                                   elevation: 0,
                                                   shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(10),  side: isFollowing?const BorderSide(color: Color(0xffAC83F6)):BorderSide(color: Color(0xffAC83F6))
+                                                    borderRadius: BorderRadius.circular(10),  side: isFollowing?const BorderSide(color: Color(0xffAC83F6)):const BorderSide(color: Color(0xffAC83F6))
 
                                                   ),
                                                 ),
@@ -369,7 +369,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                           fontSize: 13,
                                         ),
                                         textAlign: TextAlign.start,
-                                      ):Text('data')
+                                      ):const Text('data')
                                   ),
                                 ),
                               ],
@@ -395,10 +395,10 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                     builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
                                       switch (snapshot.connectionState) {
                                         case ConnectionState.none:
-                                          return Text('Press button to start.');
+                                          return const Text('Press button to start.');
                                         case ConnectionState.active:
                                         case ConnectionState.waiting:
-                                          return Text('Awaiting result...');
+                                          return const Text('Awaiting result...');
                                         case ConnectionState.done:
                                           if (snapshot.hasError) {
                                             return Text('Error: ${snapshot.error}');
@@ -429,24 +429,28 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                     builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
                                       switch (snapshot.connectionState) {
                                         case ConnectionState.none:
-                                          return Text('Press button to start.');
+                                          return const Text('Press button to start.');
                                         case ConnectionState.active:
                                         case ConnectionState.waiting:
-                                          return Text('Awaiting result...');
+                                          return const Text('Awaiting result...');
                                         case ConnectionState.done:
                                           if (snapshot.hasError) {
                                             return Text('Error: ${snapshot.error}');
                                           } else {
                                             // Use the snapshot.data to get the list of followers
-                                            List<String> followers = snapshot.data ?? [];
+                                            List<String> following  = snapshot.data ?? [];
 
                                             return Column(
                                               children: [
                                                 Text(
-                                                  ' ${followers.length}', // Display the count of followers
+                                                  ' ${following.length}', // Display the count of followers
                                                   style:  const TextStyle(color:Colors.black,fontSize: 17),textAlign: TextAlign.center,
-                                                ),const Text(
-                                                  'Followers', // Display the count of followers
+                                                ),
+                                      Text(
+                                                  'Followers ${following .length}', // Display the count of followers
+                                                  style:  const TextStyle(color:Colors.black,fontSize: 17),textAlign: TextAlign.center,
+                                                ), const Text(
+                                                  'Following', // Display the count of followers
                                                   style: TextStyle(color:Colors.grey,fontSize: 12 ),textAlign: TextAlign.center,
                                                 ),
                                               ],
@@ -534,7 +538,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                     )
                                   ],
                                 ),
-                                Expanded(
+                                const Expanded(
                                   child: Align(
                                     alignment: Alignment.centerRight,
 
@@ -560,7 +564,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                           post.userPostImage != null
                                           ? NetworkImage(post.userPostImage)
                                       as ImageProvider<Object>
-                                          : AssetImage('assets/profilepic.png')
+                                          : const AssetImage('assets/profilepic.png')
                                       as ImageProvider<Object>,
                                       fit: BoxFit.cover,
                                     ),
@@ -611,7 +615,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                 const SizedBox(width: 5),
                                 Obx(() =>  Text(
                                   post.likes.length.toString(),
-                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                  style: const TextStyle(fontWeight: FontWeight.w300),
                                 ),),
                                 const SizedBox(width: 10),
                                 InkWell(
@@ -633,7 +637,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                                 const SizedBox(width: 5),
                                 Obx(() =>  Text(
                                   "   ${  createPostController.comments.where((comment) => comment.postId==post.postId).toList().length}",
-                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                  style: const TextStyle(fontWeight: FontWeight.w300),
                                 ),),
                                 Expanded(
                                   child: Align(
@@ -678,10 +682,10 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
                               style: const TextStyle(fontSize: 13.0),
                             ),
                             const SizedBox(height: 3.0),
-                            Text(
+                            const Text(
                               '#hashtag ',
                               style:
-                              const TextStyle(color: Color(0xff7F7F7F), fontSize: 13),
+                              TextStyle(color: Color(0xff7F7F7F), fontSize: 13),
                             ),
                             const SizedBox(height: 16.0),
                           ],

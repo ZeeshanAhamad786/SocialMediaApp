@@ -1,15 +1,11 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:socialmediaapp/Models/commentsModel.dart';
-
 import '../../Controllers/CreatePostController.dart';
 import '../../Controllers/GetuserdataDataController.dart';
-
-
 class CommentsScreen extends StatefulWidget {
   final String postId;
 List postComments=[];
@@ -33,11 +29,19 @@ class _CommentsScreenState extends State<CommentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back,color: Colors.black,size: 18),
+
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+
         elevation: 0,
-        title:Obx(() =>  Text(
+        title:Obx(() =>
+
+            Text(
           'Comments (${
               createPostController.comments
                   .where((comment) => comment.postId == widget.postId)
@@ -49,6 +53,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),)
+
       ),
       body: Column(
         children: [
