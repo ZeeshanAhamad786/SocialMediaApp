@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Models/ProfileModels.dart';
 
 class ProfileViewModel extends GetxController {
-  final profile = ProfileModel(backgroundImage: "",userId: '',activeChatUsers: [],followers: '',
+  final profile = ProfileModel(backgroundImage: "",userId: '',activeChatUsers: [],followers: [],
     profileimage: '',
     name: '',
     dob: '',
@@ -24,7 +24,7 @@ class ProfileViewModel extends GetxController {
       if (userDoc.exists) {
         // Check if the field exists before accessing its value
         profile.value = ProfileModel(backgroundImage: "",userId: '',activeChatUsers: [],
-          followers: '',
+          followers: [],
           profileimage: userDoc.get('profileImage') ?? "", // Check 'profileImage' field
           name: userDoc.get('name') ?? "", // Check 'name' field
           dob: userDoc.get('dob') ?? "", // Check 'dob' field

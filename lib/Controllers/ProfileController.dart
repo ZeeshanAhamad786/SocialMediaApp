@@ -1,11 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../Models/ProfileModels.dart';
 
 
 class ProfileController extends GetxController {
 
-  final Rx<ProfileModel> userProfile = ProfileModel(backgroundImage: "",userId: '',activeChatUsers: [],followers: '',
+
+  final Rx<ProfileModel> userProfile = ProfileModel(backgroundImage: "",userId: '',activeChatUsers: [],followers: [],
+
+
+
     profileimage: 'assets/profilepic.png',
     name: "Minha Anjum",
     dob: "29/6/2002",
@@ -66,6 +71,18 @@ class ProfileController extends GetxController {
     });
   }
 
+  Future<void> updateFollowingIdInFireStore(
+     String followersId) async {
+    try {
+      await FirebaseFirestore.instance.collection("users").doc(followersId).update({
+        "followersId":
+        FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+      });
+    } catch (e) {
+      print("Error updating active chat user list: $e");
+    }
+  }
+
 // Function to get followers of a user
   Future<List<String>> getFollowers(String userId) async {
     QuerySnapshot followers = await FirebaseFirestore.instance
@@ -84,7 +101,14 @@ class ProfileController extends GetxController {
         .get();
 
     return following.docs.map((doc) => doc['userId']).cast<String>().toList();
+
   }
+
+
+
+
+
+
 
 
 }

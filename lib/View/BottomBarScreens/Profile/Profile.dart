@@ -67,6 +67,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
     }else{
 
       controller.followUser(_auth.currentUser!.uid,widget.userId);
+      controller.updateFollowingIdInFireStore(widget.userId);
     }
 
   }

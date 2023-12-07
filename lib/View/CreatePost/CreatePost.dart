@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:socialmediaapp/Controllers/CreatePostController.dart';
+import '../../Components/BottomNavigationBar/MyBottomNavigationBar.dart';
 import '../../Controllers/GetuserdataDataController.dart';
 import '../../Utis/firebase.dart';
 import '../../Widgets/CustomButton.dart';
@@ -174,10 +175,14 @@ class _CreatePostState extends State<CreatePost> {
                   width: Get.width * 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xffAC83F6),
+                      color: Color(0xffAC83F6),
                       borderRadius: BorderRadius.circular(10),
-                      image: createPostController.selectedPostImage.value !=
-                          null
+                      image: widget.imagePath != null
+                          ? DecorationImage(
+                        image: FileImage(File(widget.imagePath!)),
+                        fit: BoxFit.cover,
+                      )
+                          : createPostController.selectedPostImage.value != null
                           ? DecorationImage(
                         image: FileImage(
                           createPostController.selectedPostImage.value!,
@@ -191,6 +196,7 @@ class _CreatePostState extends State<CreatePost> {
                     margin: const EdgeInsets.all(8.0),
                   ),
                 ),
+
                 const SizedBox(
                   height: 10,
                 ),
@@ -275,27 +281,32 @@ class _CreatePostState extends State<CreatePost> {
 
   void onPressed() async {
     isLoading.value = true;
-    String postId = uuid.v4();
 
-    if (createPostController.selectedPostImage.value != null) {
+    if (widget.imagePath != null || createPostController.selectedPostImage.value != null) {
+      String postId = uuid.v4();
+
       await createPostController.createPostHandler(
-        username:
-        getUserDataController.getUserDataRxModel.value!.name,
-        userProfileImage:
-        getUserDataController.getUserDataRxModel.value!.profileimage,
+        username: getUserDataController.getUserDataRxModel.value!.name,
+        userProfileImage: getUserDataController.getUserDataRxModel.value!.profileimage,
         postId: postId,
         userId: FirebaseAuth.instance.currentUser!.uid,
-        userPostImage:
-        createPostController.selectedPostImage.value!,
-        description:
-        createPostController.postDescriptionController.text,
+        userPostImage: widget.imagePath != null
+            ? File(widget.imagePath!)
+            : createPostController.selectedPostImage.value!,
+        description: createPostController.postDescriptionController.text,
         timestamp: DateTime.now().toUtc().toIso8601String(),
       );
+
+      // Clear post image and description text field after successful upload
+      createPostController.postDescriptionController.clear();
+      createPostController.selectedPostImage.value = null;
       isLoading.value = false;
 
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => BottomNavBarV2()));
     } else {
       Get.snackbar('Error', 'Selected post image is null.');
       isLoading.value = false;
     }
   }
+
 }

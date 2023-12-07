@@ -11,8 +11,7 @@ class ProfileModel {
   final String numberOfFollowings;
   final List<String> posts;
   final List <String> activeChatUsers;
-  final String followers;
-
+  final List <String> followers;
   ProfileModel({
     required this.profileimage,
     required this.name,
@@ -43,7 +42,8 @@ class ProfileModel {
       numberOfFollowings: json['numberOfFollowings'] ?? '',
       posts: List<String>.from(json['posts'] ?? []),
       activeChatUsers: List<String>.from(json['activeChatUsers'] ?? []),
-      followers: json['followers'] ?? '',
+      followers: List<String>.from(json['followers'] ?? []),
+
       backgroundImage: json['backgroundImage'] ?? '',
 
     );

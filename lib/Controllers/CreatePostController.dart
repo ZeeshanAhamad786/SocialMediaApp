@@ -261,7 +261,7 @@ class CreatePostController extends GetxController {
     try {
       // Listen for real-time updates on the 'userPosts' collection for all users
       FirebaseFirestore.instance
-          .collectionGroup('userPosts').orderBy('timestamp',descending: true)
+          .collectionGroup('userPosts').orderBy('timestamp', descending: true)
           .snapshots()
           .listen((QuerySnapshot querySnapshot) {
         // Clear the existing posts list
@@ -295,15 +295,6 @@ class CreatePostController extends GetxController {
       Get.snackbar('Error', 'Failed to get posts: $e');
     }
   }
-
-
-
-
-
-
-
-
-
 
   // Rx variable for the selected post image
   Rx<File?> selectedPostImage = Rx<File?>(null);

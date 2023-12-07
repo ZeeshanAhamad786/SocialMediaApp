@@ -127,7 +127,7 @@ class MyDrawer extends StatelessWidget {
                                   ' ${followers.length}', // Display the count of followers
                                   style:  const TextStyle(color:Colors.black,fontSize: 17),textAlign: TextAlign.center,
                                 ),const Text(
-                                  'Followers', // Display the count of followers
+                                  'Following', // Display the count of followers
                                   style: TextStyle(color:Colors.grey,fontSize: 12 ),textAlign: TextAlign.center,
                                 ),
                               ],
