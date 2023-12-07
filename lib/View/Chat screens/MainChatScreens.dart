@@ -1,17 +1,21 @@
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../Controllers/GetuserdataDataController.dart';
-
 import '../CreatePost/UploadFeed_Dialog.dart';
 import 'CallHistory.dart';
+import 'ChatRoomScreen.dart';
 
 class MainChatScreens extends StatefulWidget {
-  const MainChatScreens({super.key});
+
+  const MainChatScreens({super.key, });
+
 
   @override
   State<MainChatScreens> createState() => _MainChatScreensState();
@@ -20,65 +24,67 @@ class MainChatScreens extends StatefulWidget {
 class _MainChatScreensState extends State<MainChatScreens> {
   GetUserDataController getUserDataController =
       Get.put(GetUserDataController());
+   bool otherUserProfile=false;
 
   // Declare a variable to hold the active chat user list
   List<String> activeChatUsersList = [];
   List<dynamic> activeChatUsersData = [];
+
   var isLoading = false.obs;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 // Your method to fetch the active chat user list
-  Future<List<String>> fetchActiveChatUserList() async {
+
+  Future<List<DocumentSnapshot<Map<String, dynamic>>>> fetchActiveChatUserData() async {
     try {
       isLoading.value = true;
-      DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
-          await FirebaseFirestore.instance
-              .collection("users")
-              .doc(FirebaseAuth.instance.currentUser!.uid)
-              .get();
 
-      // log("documentSnapshot =${documentSnapshot.data()}");
+      DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+      await _firestore.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
 
       if (documentSnapshot.exists) {
-        // Retrieve the activeChatUser field from the document
-        activeChatUsersList =
-            List<String>.from(documentSnapshot.data()?["activeChatUser"] ?? []);
+        List<String> activeChatUsersList =
+        List<String>.from(documentSnapshot.data()?["activeChatUser"] ?? []);
 
-        DocumentSnapshot<Map<String, dynamic>>? document;
+        List<DocumentSnapshot<Map<String, dynamic>>> activeChatUsersData = [];
 
-        List.generate(
-          activeChatUsersList.length,
-          (index) async {
-            document = await FirebaseFirestore.instance
-                .collection("users")
-                .doc(activeChatUsersList[index])
-                .get();
+        for (int index = 0; index < activeChatUsersList.length; index++) {
+          DocumentSnapshot<Map<String, dynamic>> document = await _firestore
+              .collection("users")
+              .doc(activeChatUsersList[index])
+              .get();
 
-            if (document!.exists) {
-              activeChatUsersData.add(documentSnapshot.data());
-            }
-          },
-        );
+          if (document.exists) {
+            activeChatUsersData.add(document);
+          }
+        }
 
         isLoading.value = false;
 
-        return activeChatUsersList;
+        // Return only the list of user data
+
+        return activeChatUsersData;
       }
     } catch (e) {
-      print("Error fetching active chat user list: $e");
+      isLoading.value = false;
     }
 
     // Return an empty list if there was an error or the document doesn't exist
     return [];
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    fetchActiveChatUserList();
+  String chatRoomId1 =const Uuid().v1();
 
 
-    super.initState();
+  String chatRoomId(String user1, String user2) {
+    if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
+      return "$user1$user2";
+    } else {
+      return "$user2$user1";
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -177,15 +183,65 @@ class _MainChatScreensState extends State<MainChatScreens> {
                 )),
             body: Stack(
               children: [
-                Expanded(
-                    child: ListView.builder(
-                  itemCount: activeChatUsersList.length,
+            FutureBuilder<List<DocumentSnapshot<Map<String, dynamic>>>>(
+                future: fetchActiveChatUserData(),
+            builder: (context, snapshot) {
+           if (snapshot.hasError) {
+                // If there was an error, display an error message
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                // If there is no data, display a message
+                return const Center(child:Text(" No Chat Availible"));
+              } else {
+                // If data is available, build the ListView
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    return const ListTile(
-                      leading:CircleAvatar() ,
+                    var userData = snapshot.data![index].data();
+
+                    // Customize the widget to display user data
+                    return InkWell(onTap:  () {
+                     // Generate a UUID if otherUserProfile is false
+
+                      Get.to(() => ChatRoom(
+                        chatRoomId: chatRoomId(
+                          getUserDataController.getUserDataRxModel.value!.name,
+                          userData?['name'],
+                        ),
+                        userMap: {
+                          "name": userData?['name'],
+                          "photoUrl": userData?['photoUrl'],
+                        },
+                        userId: userData?['userId'], profileName: userData?['name'],profilrImage: userData?['photoUrl'],
+                      ));
+
+
+
+
+
+                      // Get.to(() =>  (chatRoomId: chatRoomId1,
+                      // userMap: {
+                      //   "name": userData?['name'] ?? 'No username',
+                      //   "photoUrl":userData?['photoUrl'] ?? 'No username',
+                      // } , userId:userData?['userId'] ?? 'No username' , profileName: userData?['name'] ?? 'No username',
+                      // profilrImage: userData?['photoUrl'] ?? 'No username'),);
+                    }
+                    ,
+                      child: ListTile(leading: CircleAvatar(radius: 25,
+                        backgroundImage: NetworkImage(userData?['photoUrl'] ?? ''),),
+                        title: Text(userData?['name'] ?? '',style: const TextStyle(fontSize: 16),),subtitle:
+                          userData!['lastMessage'].toString().length<10?   Text(userData?['lastMessage'] ?? '' ,style: TextStyle(fontSize: 12)
+                          // Add more ListTile properties as needed
+                        ):Text("${userData?['lastMessage']?.substring(0, 8)}.....",style: const TextStyle(fontSize: 12)
+                            // Add more ListTile properties as needed
+                          ),trailing: Text(userData?['lastMessageTime']??"" ),)
                     );
                   },
-                )),
+                );
+              }
+            },
+          ),
+
                 Positioned(
                   bottom: 10.5.h,
                   right: 2.5.h,

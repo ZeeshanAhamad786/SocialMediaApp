@@ -9,15 +9,15 @@ import '../../../Controllers/GetuserdataDataController.dart';
 import '../../../Controllers/ProfileController.dart';
 import '../../../Widgets/MyTabBar.dart';
 import '../../../Widgets/PicPost_Widget.dart';
-import '../../Chat screens/CallBalance.dart';
 import '../../Chat screens/MainChatScreens.dart';
 import '../../Chat screens/NotificationScreen.dart';
 import '../../Chat screens/PhoneTab.dart';
-import '../../Chat screens/mainchatHomeScreen.dart';
 import '../../CreatePost/UploadFeed_Dialog.dart';
 GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   State<Home> createState() => _HomeState();
 }
@@ -34,7 +34,8 @@ class _HomeState extends State<Home> {
     HomeScreenContent(
       scaffoldKey: _scaffoldKey,
     ),
-    MainChatScreens(),
+    const MainChatScreens(
+    ),
     const PhoneTab(),
   ];
 
@@ -104,7 +105,7 @@ class HomeScreenContent extends StatelessWidget {
         Get.put(GetUserDataController());
     return Obx(
       () => getUserDataController.isGetUserDataLoading.value
-          ? const CircularProgressIndicator()
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
                 Column(

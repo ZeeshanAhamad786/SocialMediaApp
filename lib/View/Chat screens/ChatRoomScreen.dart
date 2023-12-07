@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:socialmediaapp/View/Chat%20screens/CallHistory.dart';
 import 'package:uuid/uuid.dart';
@@ -63,6 +64,7 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     });
   }
 
+  String formattedTime = DateFormat('mm:ss').format(DateTime.now());
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -97,6 +99,9 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
           .doc(widget.chatRoomId)
           .collection("chats")
           .add(messageData);
+      updateActiveChatListInFirestore(widget.userId);
+      updateOtherActiveChatListInFirestore(FirebaseAuth.instance.currentUser!.uid);
+      updateLastMessage(messageText,formattedTime.toString());
       _message.clear();
       // Get a unique set of user IDs from the users in the chat room
       Set<String> uniqueUserIds = {currentUserID, widget.userId};
@@ -111,7 +116,7 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
         await _firestore.collection("users").doc(userId).get();
 
         if (userSnapshot.exists) {
-          // Get current list of chat rooms or create an empty list
+          // Get current list of chat rooms or create an empty listF
           List<String> userChatRooms =
           List<String>.from(userSnapshot["chatRooms"] ?? []);
 
@@ -151,10 +156,24 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> updateLastMessage(String lastMessage ,String lastMessageTime) async {
+    try {
+      await _firestore
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "lastMessage":lastMessage,
+        'lastMessageTime':lastMessageTime,
+      });
+    } catch (e) {
+      print("Error updating active chat user list: $e");
+    }
+  }
+
   Future<void> updateOtherActiveChatListInFirestore(
       String activeChatUser) async {
     try {
-      await _firestore.collection("users").doc(activeChatUser).update({
+      await _firestore.collection("users").doc(widget.userId).update({
         "activeChatUser":
             FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
       });
@@ -325,34 +344,35 @@ class _ChatRoomState extends State<ChatRoom> with WidgetsBindingObserver {
         children: [
           Expanded(
               child: StreamBuilder<QuerySnapshot>(
-            stream: _firestore
-                .collection("chatRoom")
-                .doc(widget.chatRoomId)
-                .collection("chats")
-                .orderBy("time", descending: false)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> map = snapshot.data!.docs[index].data()
+                stream: _firestore
+                    .collection("chatRoom")
+                    .doc(widget.chatRoomId)
+                    .collection("chats")
+                    .orderBy("time", descending: false)
+                    .snapshots(),
+                builder:
+                    (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasData) {
+                    snapshot.data!.docs.last;
+                    return ListView.builder(
+                      itemCount: snapshot.data!.docs.length,
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> map = snapshot.data!.docs[index].data()
                         as Map<String, dynamic>;
-                    return messages(size, map, context);
-                  },
-                );
-              } else if (snapshot.hasError) {
-                // Handle error
-                return Text("Error: ${snapshot.error}");
-              } else {
-                // Handle loading state
-                return const CircularProgressIndicator();
-              }
-            },
-          )),
+                        return messages(size, map, context);
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    // Handle error
+                    return Text("Error: ${snapshot.error}");
+                  } else {
+                    // Handle loading state
+                    return const CircularProgressIndicator();
+                  }
+                },
+              )),
           Container(
             height: size.height / 10,
             width: size.width,

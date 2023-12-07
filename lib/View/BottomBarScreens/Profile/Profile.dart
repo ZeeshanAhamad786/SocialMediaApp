@@ -24,16 +24,7 @@ import '../Home/SharePost.dart';
 import 'Profile Edit/Profile_Edit.dart';
 import 'ProfileWidgets.dart';
 import 'Profile_MoreButton.dart';
-String chatRoomId1 =const Uuid().v1();
 
-
-String chatRoomId(String user1, String user2) {
-  if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
-    return "$user1$user2";
-  } else {
-    return "$user2$user1";
-  }
-}
 class Profile extends StatefulWidget {
   final bool otherUserProfile;
 
@@ -52,6 +43,18 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile>with WidgetsBindingObserver {
   CreatePostController createPostController = Get.put(CreatePostController());
   final ProfileController controller = Get.put(ProfileController());
+
+
+  String chatRoomId1 =const Uuid().v1();
+
+
+  String chatRoomId(String user1, String user2) {
+    if (user1[0].toLowerCase().codeUnits[0] > user2.toLowerCase().codeUnits[0]) {
+      return "$user1$user2";
+    } else {
+      return "$user2$user1";
+    }
+  }
 
   bool isFollowing = false;
   void toggleFollow() {
@@ -94,7 +97,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
     String roomId = widget.otherUserProfile
         ? chatRoomId(
       getUserDataController.getUserDataRxModel.value!.name,
-      widget.profileName ?? "",
+      widget.profileName,
     )
         : const Uuid().v1(); // Generate a UUID if otherUserProfile is false
 
