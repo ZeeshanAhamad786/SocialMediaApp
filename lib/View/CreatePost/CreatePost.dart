@@ -8,9 +8,11 @@ import 'package:get/get.dart';
 import 'package:socialmediaapp/Controllers/CreatePostController.dart';
 import '../../Components/BottomNavigationBar/MyBottomNavigationBar.dart';
 import '../../Controllers/GetuserdataDataController.dart';
+
 import '../../Utis/firebase.dart';
 import '../../Widgets/CustomButton.dart';
 import 'CreatePost_CustomButton.dart';
+String postId = uuid.v4();
 
 class CreatePost extends StatefulWidget {
   final String? imagePath;
@@ -31,7 +33,8 @@ class _CreatePostState extends State<CreatePost> {
   @override
   void initState() {
     super.initState();
-    createPostController.getAllPosts();
+
+
   }
 
   @override
@@ -283,7 +286,6 @@ class _CreatePostState extends State<CreatePost> {
     isLoading.value = true;
 
     if (widget.imagePath != null || createPostController.selectedPostImage.value != null) {
-      String postId = uuid.v4();
 
       await createPostController.createPostHandler(
         username: getUserDataController.getUserDataRxModel.value!.name,

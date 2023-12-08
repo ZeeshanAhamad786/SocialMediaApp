@@ -104,6 +104,22 @@ class ProfileController extends GetxController {
 
   }
 
+  Future<void> updateFollowersFireStoreForPost(String postId,  String userId) async {
+    try {
+      final postRef = FirebaseFirestore.instance
+          .collection('posts')
+          .doc(userId)
+          .collection('userPosts')
+          .doc(postId);
+
+
+      await postRef.update({'followers': FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])});
+
+    } catch (e) {
+      print("Error toggling like for post: $e");
+      Get.snackbar('Error', 'Failed to toggle like for post: $e');
+    }
+  }
 
 
 
