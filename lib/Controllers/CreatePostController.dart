@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:socialmediaapp/Models/commentsModel.dart';
@@ -42,6 +41,7 @@ class CreatePostController extends GetxController {
     required String userProfileImage,
     required String description,
     required String timestamp,
+
   }) async {
     // Check if the post description is not empty
     if (postDescriptionController.text.isNotEmpty) {
@@ -51,8 +51,8 @@ class CreatePostController extends GetxController {
         Timestamp myTimeStamp = Timestamp.fromDate(currentPhoneDate);
 
         // Get the current user's ID
-        String user = FirebaseAuth.instance.currentUser!.uid;
 
+        String user = FirebaseAuth.instance.currentUser!.uid;
         // Check if the user is authenticated
         if (user.isNotEmpty) {
           // Upload post image
@@ -64,7 +64,7 @@ class CreatePostController extends GetxController {
 
           // Add the post to Firestore
           addUser(
-            userID: user,
+
             postId: postId,
             userId: userId,
             username: username,
@@ -73,6 +73,7 @@ class CreatePostController extends GetxController {
             description: description,
             timestamp: myTimeStamp.toDate().toString(),
           );
+
         }
       } catch (e) {
         Get.snackbar('Error', (e.toString()));
@@ -85,7 +86,7 @@ class CreatePostController extends GetxController {
 
   // Method for adding a post to Firestore
   Future<void> addUser({
-    required String userID,
+
     required String postId,
     required String userId,
     required String username,
@@ -96,6 +97,7 @@ class CreatePostController extends GetxController {
   }) async {
     // Create a new post model
     final CreatePostModel post = CreatePostModel(
+      folowers: '',
       postId: postId,
       userId: userId,
       likes: RxList<LikeModel>(),
@@ -105,16 +107,18 @@ class CreatePostController extends GetxController {
       userProfileImage: userProfileImage,
       description: description,
       timestamp: DateTime.parse(timestamp),
+
     );
 
     try {
       // Add the post to Firestore
       await FirebaseFirestore.instance
           .collection('posts')
-          .doc(userID)
+          .doc(userId)
           .collection('userPosts')
           .doc(postId)
           .set(post.toMap());
+      // Update another collection in Firestore
 
       // Show a success snackbar
       getAllPosts();
@@ -126,6 +130,8 @@ class CreatePostController extends GetxController {
       Get.snackbar('Error', 'Failed to create post: $e');
     }
   }
+
+
   // Method to toggle like for a specific post
   void toggleLikeForPost(String postId) {
     final post = postsList.firstWhere(
@@ -140,12 +146,14 @@ class CreatePostController extends GetxController {
         timestamp: DateTime.now(),
         likes: RxList<LikeModel>(),
         comments: RxList<CommentModel>(),
+          folowers: ''
       ),
     );
 
     final userUid = FirebaseAuth.instance.currentUser!.uid;
 
     if (post.likes.any((like) => like.userId == userUid)) {
+
       // If the user already liked, remove the like
       post.likes.removeWhere((like) => like.userId == userUid);
       removeLikeFromDatabase(post.postId, userUid); // Remove like from Realtime Database
@@ -205,7 +213,68 @@ class CreatePostController extends GetxController {
       print("Error fetching likes for post: $e");
     }
   }
-// add Comments in Real Time Database
+// // add Comments in Real Time Database
+//   List<String> likedPostsList = [];
+//   List<dynamic> likedPostsData = [];
+//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+//   var isLoading = false.obs;
+//   Future<List<DocumentSnapshot<Map<String, dynamic>>>> fetchLikedPostsData() async {
+//     try {
+//       isLoading.value = true;
+//
+//       DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+//       await _firestore.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
+//
+//       if (documentSnapshot.exists) {
+//         List<String> likedPostsList = List<String>.from(documentSnapshot.data()?["liked"] ?? []);
+//
+//         List<DocumentSnapshot<Map<String, dynamic>>> likedPostsData = [];
+//
+//         for (int index = 0; index < likedPostsList.length; index++) {
+//           DocumentSnapshot<Map<String, dynamic>> document = await _firestore
+//               .collectionGroup("userPosts") // Use collectionGroup to query across all users
+//               .where("postId", isEqualTo: likedPostsList[index])
+//               .get()
+//               .then((querySnapshot) => querySnapshot.docs.isNotEmpty
+//               ? querySnapshot.docs.first
+//               : null);
+//
+//           if (document != null && document.exists) {
+//             likedPostsData.add(document);
+//           }
+//         }
+//
+//         isLoading.value = false;
+//
+//         // Return the list of liked posts data
+//         return likedPostsData;
+//       }
+//     } catch (e) {
+//       isLoading.value = false;
+//     }
+//
+//     // Return an empty list if there was an error or the document doesn't exist
+//     return [];
+//   }
+
+// Method to toggle like for a specific post
+  Future<void> toggleLikeInFireStoreForPost(String postId,  String userId) async {
+    try {
+      final postRef = FirebaseFirestore.instance
+          .collection('posts')
+          .doc(userId)
+          .collection('userPosts')
+          .doc(postId);
+
+
+         await postRef.update({'liked':FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])});
+
+
+    } catch (e) {
+      print("Error toggling like for post: $e");
+      Get.snackbar('Error', 'Failed to toggle like for post: $e');
+    }
+  }
 
   void addCommentToDatabase(String userProfileImage, String postId, String userUid, String comment, String userName) {
     try {
@@ -251,7 +320,6 @@ class CreatePostController extends GetxController {
       Get.snackbar("Error", "An error occurred while fetching comments");
     }
   }
-
 
 
   RxList<CreatePostModel> postsList = RxList<CreatePostModel>();

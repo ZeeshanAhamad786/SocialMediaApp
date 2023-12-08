@@ -18,6 +18,7 @@ import '../../../Widgets/PicPost_Widget.dart';
 
 import '../../Chat screens/ChatRoomScreen.dart';
 import '../../CreatePost/CommentsScreen.dart';
+
 import '../Home/PostsFeedScreen.dart';
 import '../Home/SharePost.dart';
 
@@ -68,7 +69,8 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
 
       controller.followUser(_auth.currentUser!.uid,widget.userId);
       controller.updateFollowingIdInFireStore(widget.userId);
-    }
+      controller.updateFollowersFireStoreForPost(widget.userId,widget.postId);
+        }
 
   }
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -124,7 +126,7 @@ class _ProfileState extends State<Profile>with WidgetsBindingObserver {
     }
   }
 
-  var ispersonalpost;
+
 
   List<String> media = [];
 

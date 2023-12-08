@@ -149,8 +149,7 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                         },
                         child: ProfilePicWidget(
                             picType: 'network',
-                        post.userId==post.postId?
-                        getUserDataController.getUserDataRxModel.value!.profileimage:post.userProfileImage, 45, 45),
+                      post.userProfileImage, 45, 45),
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -165,11 +164,8 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                               fontSize: 13,
                             ),
                           ),
-                          Text(
-                            post.timestamp.toString()
-                            ,
-                            style: const TextStyle(color: Colors.grey, fontSize: 11),
-                          )
+
+
 
                         ],
                       ),
@@ -225,8 +221,8 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                           ),
                           image: DecorationImage(
                             image: createPostController.postsList.isNotEmpty
-                                ? NetworkImage(post.userPostImage) as ImageProvider<Object>
-                                : AssetImage('assets/profilepic.png') as ImageProvider<Object>,
+                                ? NetworkImage(post.userPostImage)
+                                : const AssetImage('assets/profilepic.png') as ImageProvider<Object>,
                             fit: BoxFit.cover,
                           ),
 
@@ -266,6 +262,8 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                       InkWell(
                         onTap: () {
                           createPostController.toggleLikeForPost(post.postId);
+                          createPostController.toggleLikeInFireStoreForPost(post.postId,post.userId);
+
                         },
                         child: Obx(() => Icon(
                           CupertinoIcons.heart_fill,
@@ -352,9 +350,9 @@ String currentUserId=FirebaseAuth.instance.currentUser!.uid.toString();
                   ),
                   const SizedBox(height: 3.0),
 
-                  Text(
+                  const Text(
                     '#hashtag ',
-                    style: const TextStyle(color: Color(0xff7F7F7F),fontSize: 13),
+                    style: TextStyle(color: Color(0xff7F7F7F),fontSize: 13),
                   ),
 
 

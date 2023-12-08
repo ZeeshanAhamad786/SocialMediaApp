@@ -11,6 +11,7 @@ class CreatePostModel {
   final DateTime timestamp;
   RxList<LikeModel> likes = <LikeModel>[].obs;
   final RxList<CommentModel> comments;
+  final String   folowers;
 
 
   CreatePostModel({
@@ -23,6 +24,7 @@ class CreatePostModel {
     required this.timestamp,
     required this.likes,
     required this.comments,
+    required this.folowers
   });
 
   // Convert a Map to a CreatePostModel instance
@@ -37,6 +39,7 @@ class CreatePostModel {
         userPostImage: data['userPostImage'] ?? '',
         userProfileImage: data['userProfileImage'] ?? '',
         description: data['description'] ?? '',
+        folowers: data['folowers'] ?? '',
         timestamp: data['timestamp'] != null ? DateTime.parse(data['timestamp']) : DateTime.now(),
         likes: (data['likes'] as List<dynamic>? ?? []).map((like) => LikeModel.fromMap(like)).toList().obs,
         comments: (data['comments'] as List<dynamic>? ?? []).map((comment) => CommentModel.fromMap(comment)).toList().obs,// Properly convert String to DateTime
@@ -52,6 +55,7 @@ class CreatePostModel {
         userPostImage: '',
         userProfileImage: '',
         description: '',
+        folowers: '',
         timestamp: DateTime.now(),
         likes: RxList<LikeModel>(), // Initialize an empty RxList
         comments: RxList<CommentModel>(), // Initialize an empty RxList
