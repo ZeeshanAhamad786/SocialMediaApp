@@ -114,7 +114,7 @@ class _SharePost_WidgetState extends State<SharePost_Widget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // While data is loading, display a loading indicator
-          return Center(child: CircularProgressIndicator());
+          return Center();
         } else if (snapshot.hasError) {
           // If there was an error, display an error message
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -136,7 +136,7 @@ class _SharePost_WidgetState extends State<SharePost_Widget> {
                   ),
                   title: Text(userData?['name'] ?? ''),
                   // subtitle: Text(userData?['userId'] ?? ''),
-                  trailing:CircularCheckBox(value: true, onChanged: (bool? value) {
+                  trailing:CircularCheckBox(value: false, onChanged: (bool? value) {
 
                   },) ,
                   // Add more ListTile properties as needed

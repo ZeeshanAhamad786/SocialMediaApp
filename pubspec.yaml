@@ -59,6 +59,7 @@ dependencies:
   permission_handler: ^11.0.1
   json_annotation:
   json_serializable:
+  contacts_service: ^0.6.3
 
   build_runner: # Use the latest version of build_runner
   intl: ^0.18.1

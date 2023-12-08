@@ -1,9 +1,5 @@
 
-
-
-
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,6 +25,7 @@ class MyBottomSheet extends StatelessWidget {
 
     // Add more items as needed
   ];
+  List<DocumentSnapshot<Map<String, dynamic>>> selectedFollowers = [];
   @override
   Widget build(BuildContext context) {
     final filteredItems = items.where((item) => item.wantSend).toList();

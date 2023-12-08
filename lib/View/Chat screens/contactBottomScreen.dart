@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:socialmediaapp/View/Chat%20screens/dammyContacts.dart';
 
 import '../../Components/BottomNavigationBar/MyBottomNavigationBar.dart';
 import '../../Widgets/CustomButton.dart';
@@ -39,15 +40,20 @@ class _contactBottomListState extends State<contactBottomList> {
           SizedBox(
             height: size.height / 15,
           ),
-          Text(
-            "Allow",
-            style: TextStyle(color: Color(0xffAC83F6)),
+          InkWell(onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_)=>dammyContacts()));
+          },
+            child: Text(
+              "Allow",
+              style: TextStyle(color: Color(0xffAC83F6)),
+            ),
           ),
           SizedBox(
             height: size.height / 30,
           ),
           CustomButton(
             text: "Don't Allow", onPressed: () {
+
             Get.offAll(() => BottomNavBarV2());
           }
 
